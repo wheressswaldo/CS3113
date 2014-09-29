@@ -194,6 +194,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 		if ((entities[i]->getX() > 1.2 || entities[i]->getX() < -1.2) && delay <= 0) {
 			for (size_t k = 1; k < entities.size(); k++) {
 				entities[k]->direction_x = -entities[k]->direction_x;
+				entities[k]->speed += 0.1f;
 				entities[k]->y = entities[k]->y - 0.05f;
 			}
 			delay = 4;
@@ -221,7 +222,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 			}
 		//}
 	}
-	int temp = 1 + (rand() % (int)(5000 - 1 + 1));
+	int temp = 1 + (rand() % (int)(4000 - 1 + 1));
 	if (temp == 568){
 		int randomShooter = 0 + (rand() % (int)(entities.size() - 0 + 0));
 		if (randomShooter != 0){
@@ -329,10 +330,10 @@ void SpaceInvaders::renderGameOver() {
 	DrawText(fontSheetTexture, "GAME OVER", 0.1, 0.0, 0.0, 1.0, 0.0, 1.0);
 	glLoadIdentity();
 	glTranslatef(-0.3f, 0.0f, 0.0f);
-	DrawText(fontSheetTexture, "High Score: " + to_string(highScore), 0.05, 0.0, 0.0, 1.0, 0.0, 1.0);
+	DrawText(fontSheetTexture, "High Score: " + to_string(highScore), 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
 	glLoadIdentity();
 	glTranslatef(-0.85f, -0.7f, 0.0f);
-	DrawText(fontSheetTexture, "Press SPACE to go back to main menu", 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
+	DrawText(fontSheetTexture, "Press SPACE to go back to main menu", 0.05, 0.0, 0.0, 1.0, 0.0, 1.0);
 }
 bool SpaceInvaders::UpdateAndRender() {
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
