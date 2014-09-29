@@ -1,7 +1,7 @@
-cs3113hw1
+CS3113HW1
 =========
 
-cs3113hw1
+CS3113HW1
 
 • Create a simple 2D scene using textured and untextured 
 polygons. 
