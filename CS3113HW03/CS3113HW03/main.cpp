@@ -5,8 +5,7 @@
 //		Assignment 3 - Space Invaders
 //		Notes:
 //			- Code on enemy shooting is hard coded using random number generation, maybe base it on time elapsed?
-//			- Inefficient object pools, separate pools for player bullets and enemy bullets, maybe can combine
-//			- EXTRA IF TIME: More states
+//			- EXTRA IF TIME: More states, more levels
 //			- EXTRA IF TIME: Make game keep going until you die instead of just ending abruptly
 //			- EXTRA IF TIME: Bullet graphics got messed up somewhere, fix later
 //

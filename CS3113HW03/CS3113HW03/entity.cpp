@@ -16,7 +16,6 @@ const float Entity::getY() { return y; }
 void Entity::Update(float elapsed) {
 	if ((!(x > 1.2) || direction_x < 0) && (!(x < -1.2) || direction_x > 0)) {
 		x += direction_x * speed * elapsed;
-		//y += direction_y * speed * elapsed;
 	}
 }
 void Entity::Render() {

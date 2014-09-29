@@ -199,8 +199,6 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 			delay = 4;
 			break;
 		}
-
-		//for (size_t j = 0; j < MAX_BULLETS; j++) {
 			if (playerBullet.visible && isColliding(*entities[i], playerBullet) && playerBullet.playerBullet) {
 				playerBullet.visible = false;
 				delete entities[i];
@@ -219,7 +217,6 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 				}
 				break;
 			}
-		//}
 	}
 	int temp = 1 + (rand() % (int)(4000 - 1 + 1));
 	if (temp == 568){
