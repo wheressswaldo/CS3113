@@ -62,4 +62,5 @@ private:
 	float shootTimer;
 	int score;
 	int highScore;
+	float delay;
 };

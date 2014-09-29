@@ -58,6 +58,7 @@ void SpaceInvaders::init() {
 	enemyBulletIndex = 0;
 	shootTimer = 0.3f;
 	score = 0;
+	delay = 0;
 
 	playerBullet.visible = FALSE;
 
@@ -189,12 +190,13 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 			score = 0;
 			init();
 		}
-
-		if (entities[i]->getX() > 1.2 || entities[i]->getX() < -1.2) {
+		delay = delay - elapsed;
+		if ((entities[i]->getX() > 1.2 || entities[i]->getX() < -1.2) && delay <= 0) {
 			for (size_t k = 1; k < entities.size(); k++) {
 				entities[k]->direction_x = -entities[k]->direction_x;
-				entities[k]->y = entities[k]->y - 0.01f;
+				entities[k]->y = entities[k]->y - 0.05f;
 			}
+			delay = 4;
 			break;
 		}
 
