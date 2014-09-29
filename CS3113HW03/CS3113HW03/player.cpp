@@ -12,10 +12,10 @@ Player::Player(SpriteSheet sprite, float scale, float x, float y, float rotation
 	: Entity(sprite, scale, x, y, rotation, speed, direction_x)	 {}
 void Player::Update(float elapsed) {
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	if (keys[SDL_SCANCODE_A]) {
+	if (keys[SDL_SCANCODE_LEFT]) {
 		direction_x = -speed;
 	}
-	else if (keys[SDL_SCANCODE_D]) {
+	else if (keys[SDL_SCANCODE_RIGHT]) {
 		direction_x = speed;
 	}
 

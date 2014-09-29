@@ -18,7 +18,6 @@
 #include <math.h>
 #include <string>
 
-#define MAX_BULLETS 30
 using namespace std;
 
 class SpaceInvaders{
@@ -50,15 +49,14 @@ private:
 
 	vector<Entity*> entities;
 
-	int playerBulletIndex;
 	int enemyBulletIndex;
-	Bullet bullets[MAX_BULLETS];
+	Bullet playerBullet;
 	Bullet enemyBullets[5];
 
 	GLuint spriteSheetTexture;
 	GLuint fontSheetTexture;
 
-	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER, STATE_GAME_STAGE_CLEARED };
+	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER};
 	int state;
 
 	float shootTimer;

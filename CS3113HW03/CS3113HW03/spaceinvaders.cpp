@@ -27,20 +27,14 @@ SpaceInvaders::SpaceInvaders() {
 void SpaceInvaders::shootPlayerBullet() {
 	SpriteSheet bulletSprite = SpriteSheet(spriteSheetTexture, 849.0f / 1024.0f, 364.0f / 1024.0f, 9.0f / 1024.0f, 57.0f / 1024.0f);
 
-	bullets[playerBulletIndex].sprite = bulletSprite;
-	bullets[playerBulletIndex].visible = true;
-	bullets[playerBulletIndex].x = entities[0]->getX();
-	bullets[playerBulletIndex].y = entities[0]->getY();
-	bullets[playerBulletIndex].scale = 1.0f;
-	bullets[playerBulletIndex].rotation = 0.0f;
-	bullets[playerBulletIndex].speed = 2.0f;
-	bullets[playerBulletIndex].playerBullet = true;
-
-	playerBulletIndex++;
-	if (playerBulletIndex > MAX_BULLETS - 1) {
-		playerBulletIndex = 0;
-	}
-	shootTimer = 0;
+	playerBullet.sprite = bulletSprite;
+	playerBullet.visible = true;
+	playerBullet.x = entities[0]->getX();
+	playerBullet.y = entities[0]->getY();
+	playerBullet.scale = 1.0f;
+	playerBullet.rotation = 0.0f;
+	playerBullet.speed = 2.0f;
+	playerBullet.playerBullet = true;
 }
 void SpaceInvaders::shootEnemyBullet(int shooter) {
 	SpriteSheet bulletSprite = SpriteSheet(spriteSheetTexture, 849.0f / 1024.0f, 364.0f / 1024.0f, 9.0f / 1024.0f, 57.0f / 1024.0f);
@@ -61,14 +55,12 @@ void SpaceInvaders::shootEnemyBullet(int shooter) {
 	shootTimer = 0;
 }
 void SpaceInvaders::init() {
-	playerBulletIndex = 0;
 	enemyBulletIndex = 0;
 	shootTimer = 0.3f;
 	score = 0;
 
-	for (size_t i = 0; i < MAX_BULLETS; i++) {
-		bullets[i].visible = FALSE;
-	}
+	playerBullet.visible = FALSE;
+
 	for (size_t i = 0; i < 5; i++) {
 		enemyBullets[i].visible = FALSE;
 	}
@@ -181,7 +173,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 		}
 		else if (event.type == SDL_KEYDOWN) {
 			if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-				if (shootTimer > 0.1f)
+				if (!playerBullet.visible)
 					shootPlayerBullet();
 			}
 		}
@@ -201,13 +193,14 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 		if (entities[i]->getX() > 1.2 || entities[i]->getX() < -1.2) {
 			for (size_t k = 1; k < entities.size(); k++) {
 				entities[k]->direction_x = -entities[k]->direction_x;
+				entities[k]->y = entities[k]->y - 0.01f;
 			}
 			break;
 		}
 
-		for (size_t j = 0; j < MAX_BULLETS; j++) {
-			if (bullets[j].visible && isColliding(*entities[i], bullets[j]) && bullets[j].playerBullet) {
-				bullets[j].visible = false;
+		//for (size_t j = 0; j < MAX_BULLETS; j++) {
+			if (playerBullet.visible && isColliding(*entities[i], playerBullet) && playerBullet.playerBullet) {
+				playerBullet.visible = false;
 				delete entities[i];
 				entities.erase(entities.begin() + i);
 				if (i < 12 && i > 0){
@@ -224,7 +217,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 				}
 				break;
 			}
-		}
+		//}
 	}
 	int temp = 1 + (rand() % (int)(5000 - 1 + 1));
 	if (temp == 568){
@@ -232,6 +225,9 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 		if (randomShooter != 0){
 			shootEnemyBullet(randomShooter);
 		}
+	}
+	if (playerBullet.y > 1){
+		playerBullet.visible = false;
 	}
 	for (size_t j = 0; j < 5; j++){
 		if (enemyBullets[j].visible && isColliding(*entities[0], enemyBullets[j]) && !enemyBullets[j].playerBullet) {
@@ -248,9 +244,9 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 		entities[i]->Update(elapsed);
 	}
 
-	for (size_t i = 0; i < MAX_BULLETS; i++) {
-		bullets[i].Update(elapsed);
-	}
+	//for (size_t i = 0; i < MAX_BULLETS; i++) {
+		playerBullet.Update(elapsed);
+	//}
 
 	for (size_t i = 0; i < 5; i++) {
 		enemyBullets[i].Update(elapsed);
@@ -301,18 +297,22 @@ void SpaceInvaders::renderMainMenu() {
 	glTranslatef(-0.66f, 0.8f, 0.0f);
 	DrawText(fontSheetTexture, "Space Invaders", 0.1, 0.0, 0.0, 1.0, 0.0, 1.0);
 	glLoadIdentity();
+	glTranslatef(-0.8f, 0.2f, 0.0f);
+	DrawText(fontSheetTexture, "Press Arrow Keys to Move", 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
 	glLoadIdentity();
-	glTranslatef(-0.5f, -0.7f, 0.0f);
-	DrawText(fontSheetTexture, "Press SPACE to start", 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
+	glTranslatef(-0.8f, 0.0f, 0.0f);
+	DrawText(fontSheetTexture, "Press SPACE to shoot", 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
+	glLoadIdentity();
+	glTranslatef(-0.66f, -0.7f, 0.0f);
+	DrawText(fontSheetTexture, "Press SPACE to start the game", 0.05, 0.0, 0.0, 1.0, 0.0, 1.0);
 }
 void SpaceInvaders::renderGameLevel() {
 	for (size_t i = 0; i < entities.size(); i++) {
 		entities[i]->Render();
 	}
 
-	for (size_t i = 0; i < MAX_BULLETS; i++) {
-		bullets[i].Render();
-	}
+	playerBullet.Render();
+
 	for (size_t i = 0; i < 5; i++) {
 		enemyBullets[i].Render();
 	}
