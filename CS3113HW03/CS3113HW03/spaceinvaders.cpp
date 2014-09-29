@@ -52,11 +52,9 @@ void SpaceInvaders::shootEnemyBullet(int shooter) {
 	if (enemyBulletIndex > 5 - 1) {
 		enemyBulletIndex = 0;
 	}
-	shootTimer = 0;
 }
 void SpaceInvaders::init() {
 	enemyBulletIndex = 0;
-	shootTimer = 0.3f;
 	score = 0;
 	delay = 0;
 
@@ -187,6 +185,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 			if (highScore < score){
 				highScore = score;
 			}
+			roundScore = score;
 			score = 0;
 			init();
 		}
@@ -238,6 +237,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 			if (highScore < score){
 				highScore = score;
 			}
+			roundScore = score;
 			score = 0;
 			init();
 		}
@@ -246,24 +246,20 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 	for (size_t i = 0; i < entities.size(); i++) {
 		entities[i]->Update(elapsed);
 	}
-
-	//for (size_t i = 0; i < MAX_BULLETS; i++) {
-		playerBullet.Update(elapsed);
-	//}
-
+	
+	playerBullet.Update(elapsed);
+	
 	for (size_t i = 0; i < 5; i++) {
 		enemyBullets[i].Update(elapsed);
 	}
-	//stage cleared
 	if (entities.size() <= 1) {
 		state = STATE_GAME_OVER;
 		if (highScore < score){
 			highScore = score;
 		}
+		roundScore = score;
 		init();
 	}
-
-	shootTimer += elapsed;
 }
 void SpaceInvaders::updateGameOver(float elapsed) {
 	SDL_Event event;
@@ -272,7 +268,7 @@ void SpaceInvaders::updateGameOver(float elapsed) {
 			done = true;
 		}
 		else if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_Z) {
 				state = STATE_MAIN_MENU;
 			}
 		}
@@ -297,7 +293,7 @@ void SpaceInvaders::render() {
 void SpaceInvaders::renderMainMenu() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glTranslatef(-0.66f, 0.8f, 0.0f);
+	glTranslatef(-0.8f, 0.7f, 0.0f);
 	DrawText(fontSheetTexture, "Space Invaders", 0.1, 0.0, 0.0, 1.0, 0.0, 1.0);
 	glLoadIdentity();
 	glTranslatef(-0.8f, 0.2f, 0.0f);
@@ -306,7 +302,7 @@ void SpaceInvaders::renderMainMenu() {
 	glTranslatef(-0.8f, 0.0f, 0.0f);
 	DrawText(fontSheetTexture, "Press SPACE to shoot", 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
 	glLoadIdentity();
-	glTranslatef(-0.66f, -0.7f, 0.0f);
+	glTranslatef(-0.8f, -0.7f, 0.0f);
 	DrawText(fontSheetTexture, "Press SPACE to start the game", 0.05, 0.0, 0.0, 1.0, 0.0, 1.0);
 }
 void SpaceInvaders::renderGameLevel() {
@@ -326,14 +322,17 @@ void SpaceInvaders::renderGameLevel() {
 void SpaceInvaders::renderGameOver() {
 	glMatrixMode(GL_MODELVIEW); 
 	glLoadIdentity();
-	glTranslatef(-0.4f, 0.8f, 0.0f);
+	glTranslatef(-0.8f, 0.7f, 0.0f);
 	DrawText(fontSheetTexture, "GAME OVER", 0.1, 0.0, 0.0, 1.0, 0.0, 1.0);
 	glLoadIdentity();
-	glTranslatef(-0.3f, 0.0f, 0.0f);
+	glTranslatef(-0.8f, 0.2f, 0.0f);
 	DrawText(fontSheetTexture, "High Score: " + to_string(highScore), 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
 	glLoadIdentity();
-	glTranslatef(-0.85f, -0.7f, 0.0f);
-	DrawText(fontSheetTexture, "Press SPACE to go back to main menu", 0.05, 0.0, 0.0, 1.0, 0.0, 1.0);
+	glTranslatef(-0.8f, 0.0f, 0.0f);
+	DrawText(fontSheetTexture, "Round Score: " + to_string(roundScore), 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
+	glLoadIdentity();
+	glTranslatef(-0.8f, -0.7f, 0.0f);
+	DrawText(fontSheetTexture, "Press Z to go back to main menu", 0.05, 0.0, 0.0, 1.0, 0.0, 1.0);
 }
 bool SpaceInvaders::UpdateAndRender() {
 	float ticks = (float)SDL_GetTicks() / 1000.0f;

@@ -58,9 +58,8 @@ private:
 
 	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER};
 	int state;
-
-	float shootTimer;
 	int score;
+	int roundScore;
 	int highScore;
 	float delay;
 };
