@@ -31,9 +31,9 @@ void SpaceInvaders::shootPlayerBullet() {
 	playerBullet.visible = true;
 	playerBullet.x = entities[0]->getX();
 	playerBullet.y = entities[0]->getY();
-	playerBullet.scale = 1.0f;
+	playerBullet.scale = 0.4f;
 	playerBullet.rotation = 0.0f;
-	playerBullet.speed = 2.0f;
+	playerBullet.speed = 3.0f;
 	playerBullet.playerBullet = true;
 }
 void SpaceInvaders::shootEnemyBullet(int shooter) {
@@ -43,7 +43,7 @@ void SpaceInvaders::shootEnemyBullet(int shooter) {
 	enemyBullets[enemyBulletIndex].visible = true;
 	enemyBullets[enemyBulletIndex].x = entities[shooter]->getX();
 	enemyBullets[enemyBulletIndex].y = entities[shooter]->getY();
-	enemyBullets[enemyBulletIndex].scale = 1.0f;
+	enemyBullets[enemyBulletIndex].scale = 0.4f;
 	enemyBullets[enemyBulletIndex].rotation = 180.0f;
 	enemyBullets[enemyBulletIndex].speed = -1.0f;
 	enemyBullets[enemyBulletIndex].playerBullet = false;
@@ -77,36 +77,36 @@ void SpaceInvaders::init() {
 
 	SpriteSheet enemySprite = SpriteSheet(spriteSheetTexture, 10.0f / 1024.0f, 520.0f / 1024.0f, 120.0f / 1024.0f, 98.0f / 1024.0f);
 
-	for (float i = -1.0f; i < 1.0f; i = i + 0.2f) {
-		for (float j = 0.85f; j > 0.65f; j = j - 0.2f) {
-			Entity* enemy = new Entity(enemySprite, 0.7f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
+		for (float j = 0.85f; j > 0.65f; j = j - 0.15f) {
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
 
 	enemySprite = SpriteSheet(spriteSheetTexture, 10.0f / 1024.0f, 618.0f / 1024.0f, 120.0f / 1024.0f, 98.0f / 1024.0f);
 
-	for (float i = -1.0f; i < 1.0f; i = i + 0.2f) {
-		for (float j = 0.45f; j > 0.35f; j = j - 0.2f) {
-			Entity* enemy = new Entity(enemySprite, 0.7f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
+		for (float j = 0.55f; j > 0.35f; j = j - 0.15f) {
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
 
 	enemySprite = SpriteSheet(spriteSheetTexture, 10.0f / 1024.0f, 716.0f / 1024.0f, 112.0f / 1024.0f, 75.0f / 1024.0f);
 
-	for (float i = -1.0f; i < 1.0f; i = i + 0.2f) {
-		for (float j = 0.25f; j > 0.15f; j = j - 0.2f) {
-			Entity* enemy = new Entity(enemySprite, 0.7f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
+		for (float j = 0.25f; j > 0.15f; j = j - 0.15f) {
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
 
 	enemySprite = SpriteSheet(spriteSheetTexture, 10.0f / 1024.0f, 412.0f / 1024.0f, 133.0f / 1024.0f, 108.0f / 1024.0f);
 
-	for (float i = -1.0f; i < 1.0f; i = i + 0.2f) {
-		for (float j = 0.05f; j > 0.0f; j = j - 0.2f) {
-			Entity* enemy = new Entity(enemySprite, 0.7f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
+		for (float j = 0.1f; j > 0.0f; j = j - 0.15f) {
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -193,10 +193,10 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 		if ((entities[i]->getX() > 1.2 || entities[i]->getX() < -1.2) && delay <= 0) {
 			for (size_t k = 1; k < entities.size(); k++) {
 				entities[k]->direction_x = -entities[k]->direction_x;
-				entities[k]->speed += 0.1f;
-				entities[k]->y = entities[k]->y - 0.05f;
+				entities[k]->speed += 0.08f;
+				entities[k]->y = entities[k]->y - 0.02f;
 			}
-			delay = 4;
+			delay = 5;
 			break;
 		}
 			if (playerBullet.visible && isColliding(*entities[i], playerBullet) && playerBullet.playerBullet) {
@@ -218,7 +218,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 				break;
 			}
 	}
-	int temp = 1 + (rand() % (int)(4000 - 1 + 1));
+	int temp = 1 + (rand() % (int)(2000 - 1 + 1));
 	if (temp == 568){
 		int randomShooter = 0 + (rand() % (int)(entities.size() - 0 + 0));
 		if (randomShooter != 0){
