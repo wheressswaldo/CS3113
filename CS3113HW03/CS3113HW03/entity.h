@@ -16,7 +16,7 @@
 class Entity {
 public:
 	~Entity();
-	Entity(SpriteSheet sprite, float scale, float x, float y, float rotation, float speed, float direction_x = 0, float direction_y = 0);
+	Entity(SpriteSheet sprite, float scale, float x, float y, float rotation, float speed, float score, float direction_x = 0, float direction_y = 0);
 
 	const float getX();
 	const float getY();
@@ -33,4 +33,5 @@ public:
 	float speed;
 	float direction_x;
 	float direction_y;
+	float score;
 };

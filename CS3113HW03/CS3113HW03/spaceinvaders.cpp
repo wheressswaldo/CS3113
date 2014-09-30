@@ -79,7 +79,7 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.85f; j > 0.65f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 20, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -88,7 +88,7 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.55f; j > 0.35f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 10, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -97,7 +97,7 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.25f; j > 0.15f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 5, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -106,7 +106,7 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.1f; j > 0.0f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 1, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -193,28 +193,17 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 		if ((entities[i]->getX() > 1.2 || entities[i]->getX() < -1.2) && delay <= 0) {
 			for (size_t k = 1; k < entities.size(); k++) {
 				entities[k]->direction_x = -entities[k]->direction_x;
-				entities[k]->speed += 0.08f;
+				entities[k]->speed += 0.1f;
 				entities[k]->y = entities[k]->y - 0.02f;
 			}
-			delay = 5;
+			delay = 1;
 			break;
 		}
 			if (playerBullet.visible && isColliding(*entities[i], playerBullet) && playerBullet.playerBullet) {
 				playerBullet.visible = false;
+				score += entities[i]->score;
 				delete entities[i];
 				entities.erase(entities.begin() + i);
-				if (i < 12 && i > 0){
-					score += 10;
-				}
-				else if (i < 23 && i > 11) {
-					score += 10;
-				}
-				else if (i < 34 && i > 22){
-					score += 5;
-				}
-				else{
-					score += 1;
-				}
 				break;
 			}
 	}
