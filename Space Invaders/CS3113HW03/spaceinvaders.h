@@ -66,4 +66,6 @@ private:
 	float spriteDeathDelay;
 	float playerDeathDelay;
 	float delay;
+
+	bool playerDead;
 };

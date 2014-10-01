@@ -5,9 +5,10 @@
 //		Assignment 3 - Space Invaders
 //		Notes:
 //			- Code on enemy shooting is hard coded using random number generation, maybe base it on time elapsed?
+//			- Animations on bullet deaths
+//			- Keeps track of high score
 //			- EXTRA IF TIME: More states, more levels
 //			- EXTRA IF TIME: Make game keep going until you die instead of just ending abruptly
-//			- EXTRA IF TIME: Add barricades
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
