@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "SpaceInvaders.h"
+#include <iostream>
 
 SpaceInvaders::SpaceInvaders() {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -57,6 +58,7 @@ void SpaceInvaders::init() {
 	enemyBulletIndex = 0;
 	score = 0;
 	delay = 0;
+	spriteDeathDelay = 0;
 
 	playerBullet.visible = FALSE;
 
@@ -66,9 +68,13 @@ void SpaceInvaders::init() {
 	for (size_t i = 0; i < entities.size(); i++) {
 		delete entities[i];
 	}
+	for (size_t i = 0; i < defences.size(); i++) {
+		delete defences[i];
+	}
+	defences.clear();
 	entities.clear();
 	
-	spriteSheetTexture = LoadTexture("sheet3.png");
+	spriteSheetTexture = LoadTexture("newsheet.png");
 	fontSheetTexture = LoadTexture("pixel_font.png");
 
 	SpriteSheet playerSprite = SpriteSheet(spriteSheetTexture, 10.0f / 1024.0f, 791.0f / 1024.0f, 112.0f / 1024.0f, 75.0f / 1024.0f);
@@ -79,7 +85,7 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.85f; j > 0.65f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 20, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 20, 1, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -88,7 +94,7 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.55f; j > 0.35f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 10, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 10, 1, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -97,7 +103,7 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.25f; j > 0.15f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 5, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 5, 1, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
 	}
@@ -106,9 +112,16 @@ void SpaceInvaders::init() {
 
 	for (float i = -1.0f; i < 1.0f; i = i + 0.18f) {
 		for (float j = 0.1f; j > 0.0f; j = j - 0.15f) {
-			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 1, 0.2f, -0.03f);
+			Entity* enemy = new Entity(enemySprite, 0.6f, i, j, 0.0f, 1.0f, 1, 1, 0.2f, -0.03f);
 			entities.push_back(enemy);
 		}
+	}
+
+	SpriteSheet defenceSprite = SpriteSheet(spriteSheetTexture, 144.0f / 1024.0f, 156.0f / 1024.0f, 146.0f / 1024.0f, 84.0f / 1024.0f);
+
+	for (float i = -0.9f; i < 1.0f; i = i + 0.6f){
+		Entity* defence = new Entity(defenceSprite, 1.4f, i, -0.6f, 0.0f, 0.0f, 5, 6, 0.0f, 0.0f);
+		defences.push_back(defence);
 	}
 
 }
@@ -164,6 +177,31 @@ bool SpaceInvaders::isColliding(const Entity& e1, const Bullet& e2) {
 
 	return true;
 }
+
+bool SpaceInvaders::debugColliding(const Entity& e1, const Bullet& e2) {
+	float e1_y_max = e1.y + e1.sprite.height / 2;
+	float e1_y_min = e1.y - e1.sprite.height / 2;
+	float e1_x_max = e1.x + e1.sprite.width / 2;
+	float e1_x_min = e1.x - e1.sprite.width / 2;
+
+	float e2_y_max = e2.y + e2.sprite.height / 2;
+	float e2_y_min = e2.y - e2.sprite.height / 2;
+
+	float e2_x_max = e2.x + (e2.sprite.width+(240.0f/1024.0f)) / 2;
+	float e2_x_min = e2.x - (e2.sprite.width+(240.0f/1024.0f)) / 2;
+
+	if (e1_y_min > e2_y_max)
+		return false;
+	if (e1_y_max < e2_y_min)
+		return false;
+	if (e1_x_min > e2_x_max)
+		return false;
+	if (e1_x_max < e2_x_min)
+		return false;
+
+	return true;
+}
+
 void SpaceInvaders::updateGameLevel(float elapsed) {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
@@ -175,12 +213,21 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 				if (!playerBullet.visible)
 					shootPlayerBullet();
 			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_R) {
+				state = STATE_GAME_OVER;
+				if (highScore < score){
+					highScore = score;
+				}
+				roundScore = score;
+				score = 0;
+				init();
+			}
 		}
 	}
 	
 	for (size_t i = 1; i < entities.size(); i++) {
 
-		if (entities[i]->getY() < -0.7f) {
+		if (entities[i]->getY() < -0.45f) {
 			state = STATE_GAME_OVER;
 			if (highScore < score){
 				highScore = score;
@@ -189,26 +236,40 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 			score = 0;
 			init();
 		}
+
 		delay = delay - elapsed;
 		if ((entities[i]->getX() > 1.2 || entities[i]->getX() < -1.2) && delay <= 0) {
 			for (size_t k = 1; k < entities.size(); k++) {
 				entities[k]->direction_x = -entities[k]->direction_x;
 				entities[k]->speed += 0.1f;
-				entities[k]->y = entities[k]->y - 0.02f;
+				entities[k]->y = entities[k]->y - 0.01f;
 			}
 			delay = 1;
 			break;
 		}
-			if (playerBullet.visible && isColliding(*entities[i], playerBullet) && playerBullet.playerBullet) {
-				playerBullet.visible = false;
-				score += entities[i]->score;
+
+		if (entities[i]->dead == true){
+			spriteDeathDelay--;
+			if (spriteDeathDelay == 0){
 				delete entities[i];
 				entities.erase(entities.begin() + i);
 				break;
 			}
+		}
+
+		if (playerBullet.visible && isColliding(*entities[i], playerBullet) && playerBullet.playerBullet) {
+			playerBullet.visible = false;
+			score += entities[i]->score;
+			entities[i]->dead = true;
+			SpriteSheet testSprite = SpriteSheet(spriteSheetTexture, 10.0f / 1024.0f, 941.0f / 1024.0f, 112.0f / 1024.0f, 75.0f / 1024.0f);
+			entities[i]->sprite = testSprite;
+			spriteDeathDelay = 5;
+			break;
+		}
 	}
-	int temp = 1 + (rand() % (int)(2000 - 1 + 1));
-	if (temp == 568){
+
+	int temp = 1 + (rand() % (int)(50 - 1 + 1));
+	if (temp == 50){
 		int randomShooter = 0 + (rand() % (int)(entities.size() - 0 + 0));
 		if (randomShooter != 0){
 			shootEnemyBullet(randomShooter);
@@ -217,6 +278,7 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 	if (playerBullet.y > 1){
 		playerBullet.visible = false;
 	}
+
 	for (size_t j = 0; j < 5; j++){
 		if (enemyBullets[j].visible && isColliding(*entities[0], enemyBullets[j]) && !enemyBullets[j].playerBullet) {
 			state = STATE_GAME_OVER;
@@ -228,6 +290,32 @@ void SpaceInvaders::updateGameLevel(float elapsed) {
 			init();
 		}
 	}
+	
+	for (size_t i = 0; i < defences.size(); i++){
+		for (size_t j = 0; j < 5; j++){
+			if (enemyBullets[j].visible && debugColliding(*defences[i], enemyBullets[j])) {
+				enemyBullets[j].visible = false;
+				defences[i]->HP -= 1;
+				if (defences[i]->HP <= 0){
+					delete defences[i];
+					defences.erase(defences.begin() + i);
+					break;
+				}
+				break;
+			}
+		}
+		if (playerBullet.visible && debugColliding(*defences[i], playerBullet)){
+			playerBullet.visible = false;
+			defences[i]->HP -= 1;
+			if (defences[i]->HP <= 0){
+				delete defences[i];
+				defences.erase(defences.begin() + i);
+				break;
+			}
+			break;
+		}
+	}
+	
 
 	for (size_t i = 0; i < entities.size(); i++) {
 		entities[i]->Update(elapsed);
@@ -301,6 +389,11 @@ void SpaceInvaders::renderGameLevel() {
 	for (size_t i = 0; i < 5; i++) {
 		enemyBullets[i].Render();
 	}
+
+	for (size_t i = 0; i < defences.size(); i++){
+		defences[i]->Render();
+	}
+
 	glLoadIdentity();
 	glTranslatef(0.8f, -0.9f, 0.0f);
 	DrawText(fontSheetTexture, "Score: " + to_string(score), 0.05, 0.0, 0.0, 1.0, 0.0, 1.0);

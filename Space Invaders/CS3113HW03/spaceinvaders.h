@@ -28,6 +28,7 @@ public:
 	void shootEnemyBullet(int shooter);
 	void init();
 	bool isColliding(const Entity& e1, const Bullet& e2);
+	bool debugColliding(const Entity& e1, const Bullet& e2);
 	void update(float elapsed);
 	void updateMainMenu(float elapsed);
 	void updateGameLevel(float elapsed);
@@ -48,11 +49,12 @@ private:
 	SDL_Window* displayWindow;
 
 	vector<Entity*> entities;
+	vector<Entity*> defences;
 
 	int enemyBulletIndex;
 	Bullet playerBullet;
 	Bullet enemyBullets[5];
-
+	
 	GLuint spriteSheetTexture;
 	GLuint fontSheetTexture;
 
@@ -61,5 +63,7 @@ private:
 	int score;
 	int roundScore;
 	int highScore;
+	float spriteDeathDelay;
+	float playerDeathDelay;
 	float delay;
 };
