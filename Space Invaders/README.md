@@ -15,8 +15,14 @@ CS3113HW3
 
   * Organize your code!!
 
+**Title Screen:**
+
 ![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/menu.png?raw=true "Menu")
 
+**In-Game:**
+
 ![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/game.png?raw=true "Game")
+
+**Game Over:**
 
 ![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/endgame.png?raw=true "End Game")
