@@ -1,4 +1,4 @@
-﻿CS3113HW3
+﻿CS3113HW3 - Space Invaders
 =========
 
 CS3113HW3
