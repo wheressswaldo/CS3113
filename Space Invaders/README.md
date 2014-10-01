@@ -3,17 +3,17 @@
 
 CS3113HW3
 
-  *Make Space Invaders!
+  * Make Space Invaders!
 
-  *It must have 3 states: TITLE SCREEN, GAME, and GAME OVER
+  * It must have 3 states: TITLE SCREEN, GAME, and GAME OVER
 
-  *It must keep and display score
+  * It must keep and display score
 
-  *It must use sprite sheets
+  * It must use sprite sheets
 
-  *You can use any graphics you want (it doesn't have to be in space!) :)
+  * You can use any graphics you want (it doesn't have to be in space!) :)
 
-  *Organize your code!!
+  * Organize your code!!
 
 ![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/menu.png?raw=true "Menu")
 
