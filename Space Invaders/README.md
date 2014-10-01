@@ -15,5 +15,8 @@ CS3113HW3
 
 • Organize your code!!
 
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/menu.png?raw=true "Menu")
 
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/game.png?raw=true "Optional Title")
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/game.png?raw=true "Game")
+
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/endgame.png?raw=true "End Game")
