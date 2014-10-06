@@ -1,22 +1,17 @@
-﻿CS3113HW3 - Space Invaders
+﻿CS3113HW4 - Platformer
 =========
 
-CS3113HW3
+CS3113HW4
 
-  * Make Space Invaders!
+  * Make a simple single screen platformer!
 
-  * It must have 3 states: TITLE SCREEN, GAME, and GAME OVER
+  * Must use velocity, acceleration, friction, and gravity.
 
-  * It must keep and display score
+  * Must use fixed time step.
 
-  * It must use sprite sheets
+  * Player must be able to jump, but only when standing on the ground.
 
-  * You can use any graphics you want (it doesn't have to be in space!) :)
+  * Player must interact with enemies, another player, or collect items.
 
-  * Organize your code!!
+  * Can use graphics or simple shapes.
 
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/menu.png?raw=true "Menu")
-
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/game.png?raw=true "Game")
-
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Space%20Invaders/endgame.png?raw=true "End Game")
