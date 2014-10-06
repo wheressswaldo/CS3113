@@ -18,3 +18,7 @@ CS3113HW4
 **Title Screen:**
 
 ![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW04/Single%20Screen%20Platformer/platformermenu.png?raw=true "Menu")
+
+**In Game:**
+
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW04/Single%20Screen%20Platformer/platformergame.png?raw=true "Menu")
