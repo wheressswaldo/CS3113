@@ -12,4 +12,4 @@ CS3113HW2
 
 **Pong screenshot:**
 
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Pong/pong.png?raw=true "Pong")
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW02/Pong/pong.png?raw=true "Pong")
