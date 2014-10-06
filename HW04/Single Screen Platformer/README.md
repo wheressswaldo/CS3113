@@ -17,4 +17,4 @@ CS3113HW4
 
 **Title Screen:**
 
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW03/Simple%20Screen%20Platformer/platformermenu.png?raw=true "Menu")
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW04/Single%20Screen%20Platformer/platformermenu.png?raw=true "Menu")
