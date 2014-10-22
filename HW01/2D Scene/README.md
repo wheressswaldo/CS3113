@@ -15,4 +15,4 @@ CS3113HW1 - 2D Scene
 ![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW01/2D%20Scene/scene.png?raw=true "Sidescroller Menu")
 
 
-**Final Grade: A**
+**Grade: A**
