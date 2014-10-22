@@ -9,4 +9,4 @@ CS3113HW6
 
 **Pong screenshot:**
 
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW02/Pong/pong.png?raw=true "Pong")
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW06/Pong%20with%20Music%20&%20Effects/pong.png?raw=true "Pong")
