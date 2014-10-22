@@ -13,6 +13,8 @@ CS3113HW5
 
 **Title Screen:**
 
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW06/Pong%20with%20Music%20&%20Effects/pong.png?raw=true "Pong")
 
 **In Game:**
 
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW06/Pong%20with%20Music%20&%20Effects/pong.png?raw=true "Pong")
