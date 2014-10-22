@@ -20,3 +20,6 @@ assets in the class github repo.
 • At least one element of the scene must use vertex colors. 
 
 
+**Scene:**
+
+![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW01/2D%20Scene/scene.png?raw=true "Sidescroller Menu")
