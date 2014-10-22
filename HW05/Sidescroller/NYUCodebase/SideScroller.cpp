@@ -226,7 +226,7 @@ void SideScroller::renderMainMenu() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(-0.8f, 0.7f, 0.0f);
-	DrawText(fontSheetTexture, "Platformer", 0.1, 0.0, 1.0, 1.0, 0.0, 1.0);
+	DrawText(fontSheetTexture, "SideScroller", 0.1, 0.0, 1.0, 1.0, 0.0, 1.0);
 	glLoadIdentity();
 	glTranslatef(-0.8f, 0.2f, 0.0f);
 	DrawText(fontSheetTexture, "Press Arrow Keys to Move", 0.05, 0.0, 1.0, 1.0, 1.0, 1.0);
