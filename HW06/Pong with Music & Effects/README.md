@@ -1,14 +1,11 @@
-﻿CS3113HW2 - PONG
+﻿CS3113HW6 - PONG with Music & Effects
 =========
 
 CS3113HW2
 
-* Make PONG!
-* Doesn't need to keep score
-* But it must detect player wins
-* Can use images or basic shapes
-* Can use keyboard, mouse, or joystick
-
+* Use SDL_mixer to implement sound onto an existing assignment
+* One music track
+* Two sound effects
 
 **Pong screenshot:**
 
