@@ -9,7 +9,6 @@
 #include "Bullet.h"
 
 Bullet::Bullet() {
-	//Make bullet start away from screen
 	x = -2.0f;
 	y = -2.0f;
 
