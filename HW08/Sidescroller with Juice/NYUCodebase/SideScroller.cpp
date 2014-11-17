@@ -88,6 +88,7 @@ void SideScroller::Init() {
 	player->width = 0.2f;
 	player->height = 0.2f;
 	player->friction_x = 3.0f;
+	player->isPlayer = true;
 
 	entities.push_back(player);
 
