@@ -10,3 +10,5 @@ CS3113HW5
   * Implement scrolling
 
   * Load level from a file
+
+  * Very rudimentary
