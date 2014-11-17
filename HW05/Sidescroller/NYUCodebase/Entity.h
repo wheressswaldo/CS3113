@@ -34,8 +34,6 @@ public:
 	// location
 	float x = 0.0f;
 	float y = 0.0f;
-	float x_penetrated = 0.0f;
-	float y_penetrated = 0.0f;
 	float scale = 0.0f;
 	float rotation = 0.0f;
 
