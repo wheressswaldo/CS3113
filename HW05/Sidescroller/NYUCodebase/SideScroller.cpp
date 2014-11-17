@@ -281,45 +281,12 @@ void SideScroller::FixedUpdate() {
 		// update y values
 		entities[i]->y += entities[i]->velocity_y * FIXED_TIMESTEP;
 
-		// collision checks for y between fellow entities
-		if (!entities[i]->isStatic) {
-			for (size_t j = 0; j < entities.size(); j++) {
-				if (entities[i]->collidesWith(entities[j]) && entities[i] != entities[j]) {
-					float yPenetration = fabs(fabs(entities[j]->y - entities[i]->y) - entities[i]->height / 2.0f - entities[j]->height / 2.0f);
-
-					if (entities[i]->y > entities[j]->y) {
-						entities[i]->y += yPenetration + 0.001f;
-						entities[i]->collidedBottom = true;
-					}
-					else if (entities[i]->y < entities[j]->y) {
-						entities[i]->y -= yPenetration + 0.001f;
-						entities[i]->collidedTop = true;
-					}
-				}
-			}
-		}
 		// handle collision Y
 		collisionY(entities[i]);
 
 		// update x values
 		entities[i]->x += entities[i]->velocity_x * FIXED_TIMESTEP;
 
-		// collision checks for x between fellow entities
-		if (!entities[i]->isStatic) {
-			for (size_t j = 0; j < entities.size(); j++) {
-				if (entities[i]->collidesWith(entities[j]) && entities[i] != entities[j]) {
-					float xPenetration = fabs(fabs(entities[j]->x - entities[i]->x) - entities[i]->width / 2.0f - entities[j]->width / 2.0f);
-					if (entities[i]->x > entities[j]->x) {
-						entities[i]->x += xPenetration + 0.001f;
-						entities[i]->collidedLeft = true;
-					}
-					else if (entities[i]->x < entities[j]->x) {
-						entities[i]->x -= xPenetration + 0.001f;
-						entities[i]->collidedRight = true;
-					}
-				}
-			}
-		}
 		// handle collision X
 		collisionX(entities[i]);
 	}
