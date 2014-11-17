@@ -379,22 +379,27 @@ void SideScroller::renderGameLevel() {
 	glTranslatef(xloc, yloc, 0.0f);
 
 	// render level
+	// render level
 	glBindTexture(GL_TEXTURE_2D, layoutSpriteSheetTexture);
 	glEnable(GL_TEXTURE_2D);
 
 	glVertexPointer(2, GL_FLOAT, 0, vertexData.data());
 	glEnableClientState(GL_VERTEX_ARRAY);
+
 	glTexCoordPointer(2, GL_FLOAT, 0, texCoordData.data());
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	glEnable(GL_BLEND);
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
+
 	glTranslatef(-TILE_SIZE* mapWidth / 2, TILE_SIZE* mapHeight / 2, 0.0f);
 
 	glDrawArrays(GL_QUADS, 0, vertexData.size() / 2);
+
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 
