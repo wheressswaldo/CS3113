@@ -5,7 +5,7 @@ Final Project - Glow Hockey
 
   * Simple Glow Hockey
 
-  * Movement in all directions, bu tcannot move past middle
+  * Movement in all directions, but cannot move past middle
 
   * Velocity of pad will transfer to velocity of puck
 
