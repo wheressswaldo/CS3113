@@ -16,12 +16,12 @@
 
 
 ParticleSystem::ParticleSystem() {
-	// set how many particles there are
-	particles.resize(500);
 	// set particle movement coefficient
 	movement = -3.0f;
 	// set direction
 	faceLeft = true;
+	// set how many particles there are
+	particles.resize(500);
 
 	// set all particles to a random lifetime to begin with
 	for (int i = 0; i < particles.size(); i++) {
