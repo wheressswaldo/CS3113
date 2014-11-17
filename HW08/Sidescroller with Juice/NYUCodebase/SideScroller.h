@@ -20,6 +20,8 @@
 #include <iostream>
 #include <sstream>
 #include "Entity.h"
+#include "PerlinNoise.h"
+#include "ParticleSystem.h"
 
 #define FIXED_TIMESTEP 0.0166666f
 #define MAX_TIMESTEPS 6
@@ -111,4 +113,7 @@ private:
 
 	// check if its shaking to only shake when jumping
 	bool isShaking;
+
+	// particle system
+	ParticleSystem testParticleSystem = ParticleSystem();
 };

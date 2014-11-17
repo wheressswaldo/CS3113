@@ -7,7 +7,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "SideScroller.h"
-#include "PerlinNoise.h"
 
 float SideScroller::lerp(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t*v1;
@@ -59,7 +58,7 @@ SideScroller::SideScroller() {
 	timeLeftOver = 0.0f;
 
 	isShaking = true;
-	
+
 	// setting gravity
 	gravity_x = 0.0f;
 	gravity_y = -9.8f;
@@ -91,6 +90,9 @@ void SideScroller::Init() {
 	player->friction_x = 3.0f;
 
 	entities.push_back(player);
+
+	testParticleSystem.x = player->x;
+	testParticleSystem.y = player->y;
 
 	// build the level, aka read tile file and throw into leveldata
 	buildLevel();
@@ -242,6 +244,16 @@ void SideScroller::updateGameLevel(float elapsed) {
 		// how long it shakes
 		screenShake -= 0.5;
 	}
+
+	testParticleSystem.faceLeft = entities[0]->faceLeft;
+	if (testParticleSystem.faceLeft == true){
+		testParticleSystem.x = entities[0]->x + 0.15;
+	}
+	else {
+		testParticleSystem.x = entities[0]->x - 0.15;
+	}
+	testParticleSystem.y = entities[0]->y;
+	testParticleSystem.Update(elapsed);
 }
 
 void SideScroller::FixedUpdate() {
@@ -427,6 +439,8 @@ void SideScroller::renderGameLevel() {
 	for (size_t i = 0; i < entities.size(); i++) {
 		entities[i]->Render();
 	}
+
+	testParticleSystem.Render();
 }
 
 bool SideScroller::UpdateAndRender() {

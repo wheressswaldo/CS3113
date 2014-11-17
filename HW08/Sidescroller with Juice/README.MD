@@ -1,20 +1,8 @@
-﻿CS3113HW5 - SideScroller
+﻿CS3113HW8 - SideScroller with Juice
 =========
 
-CS3113HW5
+CS3113HW8
 
-  * Make a simple scrolling sidescroller game demo
+  * Add effects to an existing game
 
-  * Use a tilemap
-
-  * Implement scrolling
-
-  * Load level from a file
-
-**Title Screen:**
-
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW05/Sidescroller/menu.png?raw=true "Sidescroller Menu")
-
-**In Game:**
-
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/HW05/Sidescroller/ingame.png?raw=true "In Game")
+  * 3 effects added - Moving camera, shaking screen when player lands after jumping, trail chasing after the character

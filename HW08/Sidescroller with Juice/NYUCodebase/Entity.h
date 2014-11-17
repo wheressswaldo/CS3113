@@ -63,5 +63,5 @@ public:
 	// status
 	bool isDead = false;
 	bool isJumping = false;
-	bool faceLeft = false;
+	bool faceLeft = true;
 };
