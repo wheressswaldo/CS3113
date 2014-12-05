@@ -1,0 +1,13 @@
+bottomCircle = 0 203 175 100
+center = 0 0 350 200
+player1 = 178 348 100 100
+player1glow = 353 0 142 142
+player2 = 281 348 100 100
+player2glow = 178 203 142 142
+puck = 384 290 100 100
+puckGlow = 353 145 142 142
+redbar = 143 451 100 20
+redbarGlow = 0 409 140 40
+topCircle = 0 306 175 100
+yellowbar = 143 474 100 20
+yellowbarGlow = 0 452 140 40
