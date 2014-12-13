@@ -8,7 +8,7 @@
 
 #include "GlowHockey.h"
 
-float GlowHockey::lerp(float v0, float v1, float t) {
+float lerp(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t*v1;
 }
 
@@ -56,6 +56,14 @@ GlowHockey::GlowHockey() {
 	glOrtho(-1.33, 1.33, -1.0, 1.0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 
+	Init();
+}
+
+GlowHockey::~GlowHockey() {
+	SDL_Quit();
+}
+
+void GlowHockey::Init() {
 	// general values	
 	done = false;
 	lastFrameTicks = 0.0f;
@@ -66,22 +74,19 @@ GlowHockey::GlowHockey() {
 	gravity_y = 0.0f;
 
 	// loading textures
-	testSheet = LoadTexture("sprites.png");
+	glowSheet = LoadTexture("sprites.png", false);
+	fontSheetTexture = LoadTexture("pixel_font.png", true);
 
 	// setting state
 	state = STATE_MAIN_MENU;
 
-	Init();
-}
+	// setting score
+	player1Score = 0;
+	player2Score = 0;
 
-GlowHockey::~GlowHockey() {
-	SDL_Quit();
-}
-
-void GlowHockey::Init() {
 	// insert player as the first entity
-	SpriteSheet player1Sprite = SpriteSheet(testSheet, 178.0f / 498.0f, 348.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
-	SpriteSheet glow1Sprite = SpriteSheet(testSheet, 353.0f / 498.0f, 0.0f / 498.0f, 142.0f / 498.0f, 142.0f / 498.0f);
+	SpriteSheet player1Sprite = SpriteSheet(glowSheet, 178.0f / 498.0f, 348.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
+	SpriteSheet glow1Sprite = SpriteSheet(glowSheet, 353.0f / 498.0f, 0.0f / 498.0f, 142.0f / 498.0f, 142.0f / 498.0f);
 	player1 = new Entity();
 	player1->sprite = player1Sprite;
 	player1->glow = glow1Sprite;
@@ -89,14 +94,17 @@ void GlowHockey::Init() {
 	player1->scale_x = 0.6f;
 	player1->scale_y = 0.6f;
 	player1->x = 0.0f;
-	player1->y = 0.5f;
+	player1->y = 0.75f;
 	player1->friction_x = 3.0f;
 	player1->friction_y = 3.0f;
 	player1->isPlayer1 = true;
+	player1->collided = false;
+	// 1 is green
+	player1->cColor = 1;
 
 	// insert player 2 as second entity
-	SpriteSheet player2Sprite = SpriteSheet(testSheet, 281.0f / 498.0f, 348.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
-	SpriteSheet glow2Sprite = SpriteSheet(testSheet, 178.0f / 498.0f, 203.0f / 498.0f, 142.0f / 498.0f, 142.0f / 498.0f);
+	SpriteSheet player2Sprite = SpriteSheet(glowSheet, 281.0f / 498.0f, 348.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
+	SpriteSheet glow2Sprite = SpriteSheet(glowSheet, 178.0f / 498.0f, 203.0f / 498.0f, 142.0f / 498.0f, 142.0f / 498.0f);
 	player2 = new Entity();
 	player2->sprite = player2Sprite;
 	player2->glow = glow2Sprite;
@@ -108,9 +116,12 @@ void GlowHockey::Init() {
 	player2->friction_x = 3.0f;
 	player2->friction_y = 3.0f;
 	player2->isPlayer2 = true;
+	player2->collided = false;
+	// 2 is purple
+	player2->cColor = 2;
 
-	SpriteSheet puckSprite = SpriteSheet(testSheet, 384.0f / 498.0f, 290.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
-	SpriteSheet puckGlowSprite = SpriteSheet(testSheet, 353.0f / 498.0f, 145.0f / 498.0f, 142.0f / 498.0f, 142.0f / 498.0f);
+	SpriteSheet puckSprite = SpriteSheet(glowSheet, 384.0f / 498.0f, 290.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
+	SpriteSheet puckGlowSprite = SpriteSheet(glowSheet, 353.0f / 498.0f, 145.0f / 498.0f, 142.0f / 498.0f, 142.0f / 498.0f);
 	puck = new Entity();
 	puck->sprite = puckSprite;
 	puck->glow = puckGlowSprite;
@@ -119,24 +130,27 @@ void GlowHockey::Init() {
 	puck->scale_y = 0.5f;
 	puck->x = 0.0f;
 	puck->y = 0.0f;
-	puck->velocity_x = -1.0f;
-	puck->velocity_y = -0.8f;
-	puck->friction_x = 1.0f;
-	puck->friction_y = 1.0f;
+	puck->velocity_x = 0.0f;
+	puck->velocity_y = 0.0f;
+	puck->friction_x = 0.7f;
+	puck->friction_y = 0.7f;
 	puck->isPuck = true;
+	puck->collided = false;
+	p.position.x = puck->x;
+	p.position.y = puck->y;
 
 	// set up board
-	SpriteSheet redSprite = SpriteSheet(testSheet, 143.0f / 498.0f, 451.0f / 498.0f, 100.0f / 498.0f, 20.0f / 498.0f);
-	SpriteSheet redGlowSprite = SpriteSheet(testSheet, 0.0f / 498.0f, 409.0f / 498.0f, 140.0f / 498.0f, 40.0f / 498.0f);
-	SpriteSheet yellowSprite = SpriteSheet(testSheet, 143.0f / 498.0f, 474.0f / 498.0f, 100.0f / 498.0f, 20.0f / 498.0f);
-	SpriteSheet yellowGlowSprite = SpriteSheet(testSheet, 0.0f / 498.0f, 452.0f / 498.0f, 140.0f / 498.0f, 40.0f / 498.0f);
+	SpriteSheet redSprite = SpriteSheet(glowSheet, 143.0f / 498.0f, 451.0f / 498.0f, 100.0f / 498.0f, 20.0f / 498.0f);
+	SpriteSheet redGlowSprite = SpriteSheet(glowSheet, 0.0f / 498.0f, 409.0f / 498.0f, 140.0f / 498.0f, 40.0f / 498.0f);
+	SpriteSheet yellowSprite = SpriteSheet(glowSheet, 143.0f / 498.0f, 474.0f / 498.0f, 100.0f / 498.0f, 20.0f / 498.0f);
+	SpriteSheet yellowGlowSprite = SpriteSheet(glowSheet, 0.0f / 498.0f, 452.0f / 498.0f, 140.0f / 498.0f, 40.0f / 498.0f);
 
 	// center
-	SpriteSheet centerSprite = SpriteSheet(testSheet, 0.0f / 498.0f, 0.0f / 498.0f, 350.0f / 498.0f, 200.0f / 498.0f);
+	SpriteSheet centerSprite = SpriteSheet(glowSheet, 0.0f / 498.0f, 0.0f / 498.0f, 350.0f / 498.0f, 200.0f / 498.0f);
 
 	// player circles
-	SpriteSheet bottomCircleSprite = SpriteSheet(testSheet, 0.0f / 498.0f, 306.0f / 498.0f, 175.0f / 498.0f, 100.0f / 498.0f);
-	SpriteSheet topCircleSprite = SpriteSheet(testSheet, 0.0f / 498.0f, 203.0f / 498.0f, 175.0f / 498.0f, 100.0f / 498.0f);
+	SpriteSheet bottomCircleSprite = SpriteSheet(glowSheet, 0.0f / 498.0f, 306.0f / 498.0f, 175.0f / 498.0f, 100.0f / 498.0f);
+	SpriteSheet topCircleSprite = SpriteSheet(glowSheet, 0.0f / 498.0f, 203.0f / 498.0f, 175.0f / 498.0f, 100.0f / 498.0f);
 
 	Entity* center = new Entity();
 	center->sprite = centerSprite;
@@ -162,8 +176,8 @@ void GlowHockey::Init() {
 
 	Entity* bottomCircle = new Entity();
 	bottomCircle->sprite = bottomCircleSprite;
-	bottomCircle->scale_x = 0.95f;
-	bottomCircle->scale_y = 0.95f;
+	bottomCircle->scale_x = 0.8f;
+	bottomCircle->scale_y = 0.8f;
 	bottomCircle->x = 0.0f;
 	bottomCircle->y = -0.7f;
 	bottomCircle->friction_x = 3.0f;
@@ -183,6 +197,8 @@ void GlowHockey::Init() {
 	top1->friction_y = 3.0f;
 	top1->isWall = true;
 	top1->up = true;
+	// 3 is red
+	top1->cColor = 3;
 	entities.push_back(top1);
 
 	Entity* top2 = new Entity();
@@ -197,6 +213,8 @@ void GlowHockey::Init() {
 	top2->friction_y = 3.0f;
 	top2->isWall = true;
 	top2->up = true;
+	// 4 is yellow
+	top2->cColor = 4;
 	entities.push_back(top2);
 
 	Entity* rightside1 = new Entity();
@@ -212,6 +230,8 @@ void GlowHockey::Init() {
 	rightside1->friction_y = 3.0f;
 	rightside1->isWall = true;
 	rightside1->right = true;
+	// 4 is yellow
+	rightside1->cColor = 4;
 	entities.push_back(rightside1);
 
 	Entity* rightside2 = new Entity();
@@ -227,7 +247,10 @@ void GlowHockey::Init() {
 	rightside2->friction_y = 3.0f;
 	rightside2->isWall = true;
 	rightside2->right = true;
+	// 3 is red
+	rightside2->cColor = 3;
 	entities.push_back(rightside2);
+
 
 	Entity* leftside1 = new Entity();
 	leftside1->sprite = redSprite;
@@ -242,6 +265,8 @@ void GlowHockey::Init() {
 	leftside1->friction_y = 3.0f;
 	leftside1->isWall = true;
 	leftside1->left = true;
+	// 3 is red
+	leftside1->cColor = 3;
 	entities.push_back(leftside1);
 
 	Entity* leftside2 = new Entity();
@@ -257,6 +282,8 @@ void GlowHockey::Init() {
 	leftside2->friction_y = 3.0f;
 	leftside2->isWall = true;
 	leftside2->left = true;
+	// 4 is yellow
+	leftside2->cColor = 4;
 	entities.push_back(leftside2);
 
 	Entity* bottom1 = new Entity();
@@ -271,6 +298,8 @@ void GlowHockey::Init() {
 	bottom1->friction_y = 3.0f;
 	bottom1->isWall = true;
 	bottom1->down = true;
+	// 4 is yellow
+	bottom1->cColor = 4;
 	entities.push_back(bottom1);
 
 	Entity* bottom2 = new Entity();
@@ -285,6 +314,8 @@ void GlowHockey::Init() {
 	bottom2->friction_y = 3.0f;
 	bottom2->isWall = true;
 	bottom2->down = true;
+	// 3 is red
+	bottom2->cColor = 3;
 	entities.push_back(bottom2);
 }
 
@@ -293,6 +324,11 @@ void GlowHockey::Update(float elapsed) {
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 			done = true;
+		}
+		else if (event.type == SDL_KEYDOWN) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_T) {
+				stats = !stats;
+			}
 		}
 	}
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
@@ -303,31 +339,74 @@ void GlowHockey::Update(float elapsed) {
 	if (keys[SDL_SCANCODE_W]) {
 		player2->velocity_y = 1.0f;
 	}
-	else if (keys[SDL_SCANCODE_S]) {
+	
+	if (keys[SDL_SCANCODE_S]) {
 		player2->velocity_y = -1.0f;
 	}
-	else if (keys[SDL_SCANCODE_A]){
+	
+	if (keys[SDL_SCANCODE_A]){
 		player2->velocity_x = -1.0f;
+	}
+	
+	if (keys[SDL_SCANCODE_R]){
+		puck->x = 0.0f;
+		puck->y = 0.0f;
+	}
+
+	if (keys[SDL_SCANCODE_G]){
+		p = ParticleSystem(500);
 	}
 
 	player1->Update(elapsed);
 	player2->Update(elapsed);
 	puck->Update(elapsed);
+	p.Update(elapsed);
 }
 
 
 void GlowHockey::FixedUpdate() {
+	if (puck->y > 0.8f){
+		puck->x = 0.0f;
+		puck->y = 0.0f;
+		puck->velocity_x = 0.0f;
+		puck->velocity_y = 0.0f;
+		player2Score++;
+		scored = true;
+		scoreTime = 5;
+		// p2 score
+	}
+	if (puck->y < -0.8f){
+		puck->x = 0.0f;
+		puck->y = 0.0f;
+		puck->velocity_x = 0.0f;
+		puck->velocity_y = 0.0f;
+		player1Score++;
+		scored = true;
+		scoreTime = 5;
+		// p1 score
+	}
+
 	for (size_t i = 0; i < entities.size(); i++) {
 		// collision
 		if (entities[i]->isWall) {
 			collision(puck, entities[i]);
 		}
 	}
+	collision(player1, puck);
+	collision(player2, puck);
 
-	// apply gravity
-	if (!player1->isStatic) {
-		player1->velocity_x += gravity_x * FIXED_TIMESTEP;
-		player1->velocity_y += gravity_y * FIXED_TIMESTEP;
+	if (puck->velocity_y < 0.0f && puck->y < 0){
+		player1->velocity_x = player1->x * -1.0f;
+		player1->velocity_y = 0.8f - player1->y;
+		aiState = "Returning";
+	}
+	else //(puck->velocity_y >= 0.0f || puck->y >= 0)
+	{
+		tempSpeedX = puck->x - player1->x;
+		tempSpeedY = puck->y - player1->y;
+		player1->velocity_x = tempSpeedX * 3.0f;
+		player1->velocity_y = tempSpeedY * 3.0f;
+		aiState = "Tracking";
 	}
 
 	// apply friction
@@ -344,12 +423,6 @@ void GlowHockey::FixedUpdate() {
 	// update y values
 	player1->y += player1->velocity_y * FIXED_TIMESTEP;
 
-	// apply gravity
-	if (!player2->isStatic) {
-		player2->velocity_x += gravity_x * FIXED_TIMESTEP;
-		player2->velocity_y += gravity_y * FIXED_TIMESTEP;
-	}
-
 	// apply friction
 	player2->velocity_x = lerp(player2->velocity_x, 0.0f, FIXED_TIMESTEP * player2->friction_x);
 	player2->velocity_y = lerp(player2->velocity_y, 0.0f, FIXED_TIMESTEP * player2->friction_y);
@@ -364,15 +437,9 @@ void GlowHockey::FixedUpdate() {
 	// update y values
 	player2->y += player2->velocity_y * FIXED_TIMESTEP;
 
-	// apply gravity
-	if (!puck->isStatic) {
-		puck->velocity_x += gravity_x * FIXED_TIMESTEP;
-		puck->velocity_y += gravity_y * FIXED_TIMESTEP;
-	}
-
 	// apply friction
-	//puck->velocity_x = lerp(puck->velocity_x, 0.0f, FIXED_TIMESTEP * puck->friction_x);
-	//puck->velocity_y = lerp(puck->velocity_y, 0.0f, FIXED_TIMESTEP * puck->friction_y);
+	puck->velocity_x = lerp(puck->velocity_x, 0.0f, FIXED_TIMESTEP * puck->friction_x);
+	puck->velocity_y = lerp(puck->velocity_y, 0.0f, FIXED_TIMESTEP * puck->friction_y);
 
 	// apply velocity
 	puck->velocity_x += puck->acceleration_x * FIXED_TIMESTEP;
@@ -384,28 +451,170 @@ void GlowHockey::FixedUpdate() {
 	// update y values
 	puck->y += puck->velocity_y * FIXED_TIMESTEP;
 
-	if (puck->y > 0.85f){
-		puck->x = 0.0f;
-		puck->y = 0.0f;
-		// p2 score
+	// update particles;
+	p.position.x = puck->x;
+	p.position.y = puck->y;
+
+	if (scoreTime > 0){
+		scoreTime--;
 	}
-	if (puck->y < -0.85f){
-		puck->x = 0.0f;
-		puck->y = 0.0f;
-		// p1 score
+	else if (scoreTime == 0){
+		scored = false;
 	}
+	
 }
 
 void GlowHockey::Render() {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	for (size_t i = 0; i < entities.size(); i++) {
-		entities[i]->Render();
+	if (scored){
+		glClear(GL_COLOR_BUFFER_BIT);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	player1->Render();
-	player2->Render();
-	puck->Render();
+	else{
+		glClear(GL_COLOR_BUFFER_BIT);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		for (size_t i = 0; i < entities.size(); i++) {
+			entities[i]->Render();
+		}
+		player1->Render();
+		player2->Render();
+		puck->Render();
+		p.Render();
+
+		glLoadIdentity();
+		glTranslatef(0.65f, 0.25f, 0.0f);
+		glRotatef(-90.0f, 0, 0, 1);
+		glScalef(0.6f, 0.6f, 0.0f);
+		string player1SString = to_string(player1Score);
+		DrawText(fontSheetTexture, player1SString, 0.1f, 0.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.8f);
+
+		glLoadIdentity();
+		glTranslatef(0.65f, 0.12f, 0.0f);
+		glRotatef(-90.0f, 0, 0, 1);
+		glScalef(0.6f, 0.6f, 0.0f);
+		DrawText(fontSheetTexture, "Score", 0.1f, 0.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.8f);
+
+		glLoadIdentity();
+		glTranslatef(0.65f, -0.25f, 0.0f);
+		glRotatef(-90.0f, 0, 0, 1);
+		glScalef(0.6f, 0.6f, 0.0f);
+		string player2SString = to_string(player2Score);
+		DrawText(fontSheetTexture, player2SString, 0.1f, 0.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.8f);
+
+		// STAT TRACKING
+		if (stats){
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.8f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string aState = "AI State: " + aiState;
+			DrawText(fontSheetTexture, aState, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.7f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string pX = "Puck X: " + to_string(puck->x);
+			DrawText(fontSheetTexture, pX, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.6f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string pY = "Puck Y: " + to_string(puck->y);
+			DrawText(fontSheetTexture, pY, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.5f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string vX = "Puck VX: " + to_string(puck->velocity_x);
+			DrawText(fontSheetTexture, vX, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.4f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string vY = "Puck VY: " + to_string(puck->velocity_y);
+			DrawText(fontSheetTexture, vY, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.3f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p1X = "Player 1 X: " + to_string(player1->x);
+			DrawText(fontSheetTexture, p1X, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.2f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p1Y = "Player 1 Y: " + to_string(player1->y);
+			DrawText(fontSheetTexture, p1Y, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.1f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p1VX = "Player 1 VX: " + to_string(player1->velocity_x);
+			DrawText(fontSheetTexture, p1VX, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, 0.0f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p1VY = "Player 1 VY: " + to_string(player1->velocity_y);
+			DrawText(fontSheetTexture, p1VY, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.1f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p2X = "Player 2 X: " + to_string(player2->x);
+			DrawText(fontSheetTexture, p2X, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.2f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p2Y = "Player 2 Y: " + to_string(player2->y);
+			DrawText(fontSheetTexture, p2Y, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.3f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p2VX = "Player 2 VX: " + to_string(player2->velocity_x);
+			DrawText(fontSheetTexture, p2VX, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.4f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string p2VY = "Player 2 VY: " + to_string(player2->velocity_y);
+			DrawText(fontSheetTexture, p2VY, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.5f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string pCol;
+			if (puck->collided){
+				pCol = "Puck collided: true";
+			}
+			else{
+				pCol = "Puck collided: false";
+			}
+			DrawText(fontSheetTexture, pCol, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.6f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string particleSystemX = "Particle X: " + to_string(p.position.x);
+			DrawText(fontSheetTexture, particleSystemX, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.7f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string particleSystemY = "Particle Y: " + to_string(p.position.y);
+			DrawText(fontSheetTexture, particleSystemY, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.8f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			string particleSize = "Particle Size: " + to_string(p.particles.size());
+			DrawText(fontSheetTexture, particleSize, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+		}
+	}
 
 	SDL_GL_SwapWindow(displayWindow);
 }
@@ -453,39 +662,176 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 	float mxXA = max(max(max(a1.x, a3.x), a2.x), a4.x);
 
 	// check x a
-	if (!(mXA <= e1->sprite.width * e1->scale_x && mxXA >= -e1->sprite.width * e1->scale_x))
+	if (!(mXA <= e1->sprite.width * e1->scale_x && mxXA >= -e1->sprite.width * e1->scale_x)){
+		e1->collided = false;
+		e2->collided = false;
 		return false;
+	}
 
 	float mYA = min(min(min(a1.y, a3.y), a2.y), a4.y);
 	float mxYA = max(max(max(a1.y, a3.y), a2.y), a4.y);
 
 	// check y a
-	if (!(mYA <= e1->sprite.height * e1->scale_y && mxYA >= -e1->sprite.height * e1->scale_y))
+	if (!(mYA <= e1->sprite.height * e1->scale_y && mxYA >= -e1->sprite.height * e1->scale_y)){
+		e1->collided = false;
+		e2->collided = false;
 		return false;
+	}
 
 	float mXB = min(min(min(b1.x, b3.x), b2.x), b4.x);
 	float mxXB = max(max(max(b1.x, b3.x), b2.x), b4.x);
 
 	// check x a
-	if (!(mXB <= e2->sprite.width * e2->scale_x && mxXB >= -e2->sprite.width * e2->scale_x))
+	if (!(mXB <= e2->sprite.width * e2->scale_x && mxXB >= -e2->sprite.width * e2->scale_x)){
+		e1->collided = false;
+		e2->collided = false;
 		return false;
+	}
 
 	float mYB = min(min(min(b1.y, b3.y), b2.y), b4.y);
 	float mxYB = max(max(max(b1.y, b3.y), b2.y), b4.y);
 
-	if (!(mYB <= e2->sprite.height * e2->scale_y && mxYB >= -e2->sprite.height * e2->scale_y))
+	if (!(mYB <= e2->sprite.height * e2->scale_y && mxYB >= -e2->sprite.height * e2->scale_y)){
+		e1->collided = false;
+		e2->collided = false;
 		return false;
+	}
 
 	if (e1 == puck){
-		if (e2->up)
-			puck->velocity_y = puck->velocity_y * -1.0;
-		else if (e2->down)
-			puck->velocity_y = puck->velocity_y * -1.0;
-		else if (e2->left)
-			puck->velocity_x = puck->velocity_x * -1.0;
-		else if (e2->right)
-			puck->velocity_x = puck->velocity_x * -1.0;
+		if (e1->collided == false){
+			if (e2->up){
+				puck->collided = true;
+				p = ParticleSystem(20);
+				if (e2->cColor == 3){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 0.0f;
+				}
+				else if (e2->cColor == 4){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 1.0f;
+				}
+				for (unsigned int i = 0; i < p.particles.size(); i++) {
+					p.particles[i].position.x = puck->x;
+					p.particles[i].position.y = puck->y;
+				}
+				if (puck->velocity_y > 0){
+					puck->velocity_y = puck->velocity_y * -1.0f;
+				}
+			}
+			else if (e2->down){
+				puck->collided = true;
+				p = ParticleSystem(20);
+				if (e2->cColor == 3){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 0.0f;
+				}
+				else if (e2->cColor == 4){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 1.0f;
+				}
+				for (unsigned int i = 0; i < p.particles.size(); i++) {
+					p.particles[i].position.x = puck->x;
+					p.particles[i].position.y = puck->y;
+				}
+				if (puck->velocity_y < 0){
+					puck->velocity_y = puck->velocity_y * -1.0f;
+				}
+			}
+			else if (e2->left){
+				puck->collided = true;
+				p = ParticleSystem(20);
+				if (e2->cColor == 3){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 0.0f;
+				}
+				else if (e2->cColor == 4){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 1.0f;
+				}
+				for (unsigned int i = 0; i < p.particles.size(); i++) {
+					p.particles[i].position.x = puck->x;
+					p.particles[i].position.y = puck->y;
+				}
+				if (puck->velocity_x < 0){
+					puck->velocity_x = puck->velocity_x * -1.0f;
+				}
+			}
+			else if (e2->right){
+				puck->collided = true;
+				p = ParticleSystem(20);
+				if (e2->cColor == 3){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 0.0f;
+				}
+				else if (e2->cColor == 4){
+					p.red = 1.0f;
+					p.blue = 0.0f;
+					p.green = 1.0f;
+				}
+				for (unsigned int i = 0; i < p.particles.size(); i++) {
+					p.particles[i].position.x = puck->x;
+					p.particles[i].position.y = puck->y;
+				}
+				if (puck->velocity_x > 0){
+					puck->velocity_x = puck->velocity_x * -1.0f;
+				}
+			}
+		}
 	}
+	
+	if (e1 == player2){
+		if (player2->collided == false){
+			puck->collided = true;
+			player2->collided = true;
+			p = ParticleSystem(20);
+			p.red = 1.0f;
+			p.blue = 1.0f;
+			p.green = 0.0f;
+			for (unsigned int i = 0; i < p.particles.size(); i++) {
+				p.particles[i].position.x = puck->x;
+				p.particles[i].position.y = puck->y;
+			}
+			if (player2->velocity_x >= 0)
+				puck->velocity_x = player2->velocity_x + 0.2f;
+			if (player2->velocity_x <= 0)
+				puck->velocity_x = player2->velocity_x - 0.2f;
+			if (player2->velocity_y >= 0)
+				puck->velocity_y = player2->velocity_y + 0.2f;
+			if (player2->velocity_y <= 0)
+				puck->velocity_y = player2->velocity_y - 0.2f;
+		}
+	}
+
+	if (e1 == player1){
+		if (player1->collided == false){
+			puck->collided = true;
+			player1->collided = true;
+			p = ParticleSystem(20);
+			p.red = 0.0f;
+			p.blue = 0.0f;
+			p.green = 1.0f;
+			for (unsigned int i = 0; i < p.particles.size(); i++) {
+				p.particles[i].position.x = puck->x;
+				p.particles[i].position.y = puck->y;
+			}
+			if (player1->velocity_x >= 0)
+				puck->velocity_x = player1->velocity_x + 0.4f;
+			if (player1->velocity_x <= 0)
+				puck->velocity_x = player1->velocity_x - 0.4f;
+			if (player1->velocity_y >= 0)
+				puck->velocity_y = player1->velocity_y + 0.4f;
+			if (player1->velocity_y <= 0)
+				puck->velocity_y = player1->velocity_y - 0.4f;
+		}
+	}
+
 	// end
 	return true;
 }

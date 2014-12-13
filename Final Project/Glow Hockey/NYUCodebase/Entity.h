@@ -58,12 +58,14 @@ public:
 	bool isBackground = false;
 	bool isPuck = false;
 	bool glowing = false;
+	int cColor = 0;
 
 	// status
 	bool left = false;
 	bool right = false;
 	bool up = false;
 	bool down = false;
+	bool collided = false;
 
 	// matrix operations
 	Matrix matrix;

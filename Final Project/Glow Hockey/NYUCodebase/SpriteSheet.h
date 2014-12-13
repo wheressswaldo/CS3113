@@ -23,4 +23,4 @@ public:
 	float width;
 	float height;
 };
-GLuint LoadTexture(const char *image_path);
+GLuint LoadTexture(const char *image_path, bool isText);

@@ -79,12 +79,14 @@
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="SpriteSheet.cpp" />
     <ClCompile Include="GlowHockey.cpp" />
     <ClCompile Include="Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="SpriteSheet.h" />
     <ClInclude Include="GlowHockey.h" />
