@@ -83,8 +83,6 @@ private:
 	// score!
 	int player1Score;
 	int player2Score;
-	bool scored = false;
-	int scoreTime = 0;
 
 	// tempXY
 	float tempSpeedX = 0.0f;
@@ -92,12 +90,14 @@ private:
 
 	// AI State
 	string aiState = "Tracking";
+	float AIDifficulty;
 
 	// stats on or off
 	bool stats = "true";
 
 	// particles
 	ParticleSystem p;
+	int particleCount;
 
 };
 

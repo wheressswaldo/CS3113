@@ -46,10 +46,6 @@ public:
 
 	// collision
 	bool isStatic = false;
-	bool collidedTop = false;
-	bool collidedBottom = false;
-	bool collidedLeft = false;
-	bool collidedRight = false;
 
 	// types
 	bool isPlayer1 = false;

@@ -84,6 +84,13 @@ void GlowHockey::Init() {
 	player1Score = 0;
 	player2Score = 0;
 
+	// particles
+	particleCount = 15;
+	p = ParticleSystem(particleCount);
+
+	// ai
+	AIDifficulty = 1;
+
 	// insert player as the first entity
 	SpriteSheet player1Sprite = SpriteSheet(glowSheet, 178.0f / 498.0f, 348.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
 	SpriteSheet glow1Sprite = SpriteSheet(glowSheet, 353.0f / 498.0f, 0.0f / 498.0f, 142.0f / 498.0f, 142.0f / 498.0f);
@@ -136,8 +143,6 @@ void GlowHockey::Init() {
 	puck->friction_y = 0.7f;
 	puck->isPuck = true;
 	puck->collided = false;
-	p.position.x = puck->x;
-	p.position.y = puck->y;
 
 	// set up board
 	SpriteSheet redSprite = SpriteSheet(glowSheet, 143.0f / 498.0f, 451.0f / 498.0f, 100.0f / 498.0f, 20.0f / 498.0f);
@@ -329,6 +334,12 @@ void GlowHockey::Update(float elapsed) {
 			if (event.key.keysym.scancode == SDL_SCANCODE_T) {
 				stats = !stats;
 			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_3) {
+				AIDifficulty = AIDifficulty - 0.5f;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_4) {
+				AIDifficulty = AIDifficulty + 0.5f;
+			}
 		}
 	}
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
@@ -351,10 +362,16 @@ void GlowHockey::Update(float elapsed) {
 	if (keys[SDL_SCANCODE_R]){
 		puck->x = 0.0f;
 		puck->y = 0.0f;
+		puck->velocity_x = 0.0f;
+		puck->velocity_y = 0.0f;
 	}
 
-	if (keys[SDL_SCANCODE_G]){
-		p = ParticleSystem(500);
+	if (keys[SDL_SCANCODE_1]){
+		particleCount++;
+	}
+
+	if (keys[SDL_SCANCODE_2]){
+		particleCount--;
 	}
 
 	player1->Update(elapsed);
@@ -371,8 +388,6 @@ void GlowHockey::FixedUpdate() {
 		puck->velocity_x = 0.0f;
 		puck->velocity_y = 0.0f;
 		player2Score++;
-		scored = true;
-		scoreTime = 5;
 		// p2 score
 	}
 	if (puck->y < -0.8f){
@@ -381,8 +396,6 @@ void GlowHockey::FixedUpdate() {
 		puck->velocity_x = 0.0f;
 		puck->velocity_y = 0.0f;
 		player1Score++;
-		scored = true;
-		scoreTime = 5;
 		// p1 score
 	}
 
@@ -396,16 +409,16 @@ void GlowHockey::FixedUpdate() {
 	collision(player2, puck);
 
 	if (puck->velocity_y < 0.0f && puck->y < 0){
-		player1->velocity_x = player1->x * -1.0f;
-		player1->velocity_y = 0.8f - player1->y;
+		player1->velocity_x = (player1->x * -1.0f) * 3.0f * AIDifficulty;
+		player1->velocity_y = (0.8f - player1->y) * 2.0f * AIDifficulty;
 		aiState = "Returning";
 	}
 	else //(puck->velocity_y >= 0.0f || puck->y >= 0)
 	{
 		tempSpeedX = puck->x - player1->x;
 		tempSpeedY = puck->y - player1->y;
-		player1->velocity_x = tempSpeedX * 3.0f;
-		player1->velocity_y = tempSpeedY * 3.0f;
+		player1->velocity_x = tempSpeedX * 3.0f * AIDifficulty;
+		player1->velocity_y = tempSpeedY * 2.0f * AIDifficulty;
 		aiState = "Tracking";
 	}
 
@@ -450,28 +463,10 @@ void GlowHockey::FixedUpdate() {
 
 	// update y values
 	puck->y += puck->velocity_y * FIXED_TIMESTEP;
-
-	// update particles;
-	p.position.x = puck->x;
-	p.position.y = puck->y;
-
-	if (scoreTime > 0){
-		scoreTime--;
-	}
-	else if (scoreTime == 0){
-		scored = false;
-	}
 	
 }
 
 void GlowHockey::Render() {
-	if (scored){
-		glClear(GL_COLOR_BUFFER_BIT);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	else{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
@@ -599,21 +594,14 @@ void GlowHockey::Render() {
 			glLoadIdentity();
 			glTranslatef(-1.3f, -0.6f, 0.0f);
 			glScalef(0.3f, 0.3f, 0.0f);
-			string particleSystemX = "Particle X: " + to_string(p.position.x);
-			DrawText(fontSheetTexture, particleSystemX, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+			string particleC = "Particle Count: " + to_string(particleCount);
+			DrawText(fontSheetTexture, particleC, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
 
 			glLoadIdentity();
 			glTranslatef(-1.3f, -0.7f, 0.0f);
 			glScalef(0.3f, 0.3f, 0.0f);
-			string particleSystemY = "Particle Y: " + to_string(p.position.y);
-			DrawText(fontSheetTexture, particleSystemY, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
-
-			glLoadIdentity();
-			glTranslatef(-1.3f, -0.8f, 0.0f);
-			glScalef(0.3f, 0.3f, 0.0f);
-			string particleSize = "Particle Size: " + to_string(p.particles.size());
-			DrawText(fontSheetTexture, particleSize, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
-		}
+			string aid = "AI Difficulty: " + to_string(AIDifficulty);
+			DrawText(fontSheetTexture, aid, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
 	}
 
 	SDL_GL_SwapWindow(displayWindow);
@@ -701,17 +689,18 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 		if (e1->collided == false){
 			if (e2->up){
 				puck->collided = true;
-				p = ParticleSystem(20);
+				p = ParticleSystem(particleCount);
 				if (e2->cColor == 3){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 0.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 50.0f / 255.0f;
+					p.green = 50.0f / 255.0f;
 				}
 				else if (e2->cColor == 4){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 1.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 100.0f / 255.0f;
+					p.green = 255.0f / 255.0f;
 				}
+				p.Reset(3);
 				for (unsigned int i = 0; i < p.particles.size(); i++) {
 					p.particles[i].position.x = puck->x;
 					p.particles[i].position.y = puck->y;
@@ -722,17 +711,18 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 			}
 			else if (e2->down){
 				puck->collided = true;
-				p = ParticleSystem(20);
+				p = ParticleSystem(particleCount);
 				if (e2->cColor == 3){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 0.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 50.0f / 255.0f;
+					p.green = 50.0f / 255.0f;
 				}
 				else if (e2->cColor == 4){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 1.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 100.0f / 255.0f;
+					p.green = 255.0f / 255.0f;
 				}
+				p.Reset(4);
 				for (unsigned int i = 0; i < p.particles.size(); i++) {
 					p.particles[i].position.x = puck->x;
 					p.particles[i].position.y = puck->y;
@@ -743,17 +733,18 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 			}
 			else if (e2->left){
 				puck->collided = true;
-				p = ParticleSystem(20);
+				p = ParticleSystem(particleCount);
 				if (e2->cColor == 3){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 0.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 50.0f / 255.0f;
+					p.green = 50.0f / 255.0f;
 				}
 				else if (e2->cColor == 4){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 1.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 100.0f / 255.0f;
+					p.green = 255.0f / 255.0f;
 				}
+				p.Reset(2);
 				for (unsigned int i = 0; i < p.particles.size(); i++) {
 					p.particles[i].position.x = puck->x;
 					p.particles[i].position.y = puck->y;
@@ -764,17 +755,18 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 			}
 			else if (e2->right){
 				puck->collided = true;
-				p = ParticleSystem(20);
+				p = ParticleSystem(particleCount);
 				if (e2->cColor == 3){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 0.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 50.0f / 255.0f;
+					p.green = 50.0f / 255.0f;
 				}
 				else if (e2->cColor == 4){
-					p.red = 1.0f;
-					p.blue = 0.0f;
-					p.green = 1.0f;
+					p.red = 255.0f / 255.0f;
+					p.blue = 100.0f / 255.0f;
+					p.green = 255.0f / 255.0f;
 				}
+				p.Reset(1);
 				for (unsigned int i = 0; i < p.particles.size(); i++) {
 					p.particles[i].position.x = puck->x;
 					p.particles[i].position.y = puck->y;
@@ -790,10 +782,11 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 		if (player2->collided == false){
 			puck->collided = true;
 			player2->collided = true;
-			p = ParticleSystem(20);
-			p.red = 1.0f;
-			p.blue = 1.0f;
-			p.green = 0.0f;
+			p = ParticleSystem(particleCount);
+			p.red = 255.0f/255.0f;
+			p.blue = 255.0f/255.0f;
+			p.green = 100.0f/255.0f;
+			p.Reset(0);
 			for (unsigned int i = 0; i < p.particles.size(); i++) {
 				p.particles[i].position.x = puck->x;
 				p.particles[i].position.y = puck->y;
@@ -813,10 +806,11 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 		if (player1->collided == false){
 			puck->collided = true;
 			player1->collided = true;
-			p = ParticleSystem(20);
-			p.red = 0.0f;
-			p.blue = 0.0f;
-			p.green = 1.0f;
+			p = ParticleSystem(particleCount);
+			p.red = 100.0f/255.0f;
+			p.blue = 100.0f/255.0f;
+			p.green = 255.0f/255.0f;
+			p.Reset(0);
 			for (unsigned int i = 0; i < p.particles.size(); i++) {
 				p.particles[i].position.x = puck->x;
 				p.particles[i].position.y = puck->y;

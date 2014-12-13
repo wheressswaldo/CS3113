@@ -12,14 +12,13 @@ Entity::~Entity() {}
 
 // update
 void Entity::Update(float elapsed) {
-	// so stuff doesn't fly off the screen
-	// adjustments
+	// adjustments so stuff doesn't fly off the screen, just in case
 	if (x < -1.4f || x >1.4f)
 		velocity_x *= -1;
 	if (y < -1.0f || y > 1.0f)
 		velocity_y *= -1;
 
-	// adjustments
+	// adjustments, making sure the player doesn't go off the hockey board
 	if (isPlayer1){
 		if (x < -0.46f)
 			x = -0.46f;
@@ -31,6 +30,7 @@ void Entity::Update(float elapsed) {
 			y = 0.715f;
 	}
 
+	// adjustments, making sure the player doesn't go off the hockey board
 	if (isPlayer2){
 		if (x < -0.46f)
 			x = -0.46f;
@@ -49,9 +49,11 @@ void Entity::Render() {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glMultMatrixf(matrix.ml);
+	// draw the glow first if theres a glow
 	if (glowing){
 		glow.Draw(scale_x, scale_y);
 	}
+	// draw sprite over the glow
 	sprite.Draw(scale_x, scale_y);
 	glPopMatrix();
 }
