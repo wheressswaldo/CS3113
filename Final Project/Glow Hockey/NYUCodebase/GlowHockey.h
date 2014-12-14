@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <GL/glew.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
@@ -38,10 +39,16 @@ public:
 
 	// all updates
 	void Update(float elapsed);
+	void UpdateMainMenu(float elapsed);
+	void UpdateGameLevel(float elapsed);
+	void UpdateGameOver(float elapsed);
 	void FixedUpdate();
 
 	// all renders
 	void Render();
+	void RenderMainMenu();
+	void RenderGameLevel();
+	void RenderGameOver();
 
 	// update and render (elapsed)
 	bool UpdateAndRender();
@@ -69,7 +76,7 @@ private:
 	float gravity_y;
 
 	// game states
-	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL };
+	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER };
 	int state;
 
 	// vectors
@@ -89,6 +96,7 @@ private:
 	float tempSpeedY = 0.0f;
 
 	// AI State
+	bool aiOn;
 	string aiState = "Tracking";
 	float AIDifficulty;
 
@@ -98,6 +106,19 @@ private:
 	// particles
 	ParticleSystem p;
 	int particleCount;
+
+	// menu control flow
+	int menuControl;
+	Entity* controlIndicator;
+
+	// music
+	Mix_Chunk *hitWall;
+	Mix_Chunk *hitPuck;
+	Mix_Chunk *moveMenu;
+	Mix_Chunk *selectMenu;
+	Mix_Chunk *cancelMenu;
+	Mix_Chunk *goal;
+	int volumeLevels;
 
 };
 

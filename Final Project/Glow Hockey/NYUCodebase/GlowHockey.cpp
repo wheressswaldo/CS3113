@@ -64,6 +64,9 @@ GlowHockey::~GlowHockey() {
 }
 
 void GlowHockey::Init() {
+	// clearing vector
+	entities.clear();
+
 	// general values	
 	done = false;
 	lastFrameTicks = 0.0f;
@@ -90,6 +93,28 @@ void GlowHockey::Init() {
 
 	// ai
 	AIDifficulty = 1;
+	aiOn = true;
+
+	// menu control
+	menuControl = 1;
+
+	// music
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+	hitWall = Mix_LoadWAV("HitWall.wav");
+	hitPuck = Mix_LoadWAV("HitPuck.wav");
+	moveMenu = Mix_LoadWAV("MoveMenu.wav");
+	selectMenu = Mix_LoadWAV("SelectMenu.wav");
+	cancelMenu = Mix_LoadWAV("CancelMenu.wav");
+	goal = Mix_LoadWAV("Goal.wav");
+
+	volumeLevels = 20;
+
+	Mix_VolumeChunk(hitWall, volumeLevels);
+	Mix_VolumeChunk(hitPuck, volumeLevels);
+	Mix_VolumeChunk(moveMenu, volumeLevels);
+	Mix_VolumeChunk(selectMenu, volumeLevels);
+	Mix_VolumeChunk(cancelMenu, volumeLevels);
+	Mix_VolumeChunk(goal, (volumeLevels - 10));
 
 	// insert player as the first entity
 	SpriteSheet player1Sprite = SpriteSheet(glowSheet, 178.0f / 498.0f, 348.0f / 498.0f, 100.0f / 498.0f, 100.0f / 498.0f);
@@ -143,6 +168,19 @@ void GlowHockey::Init() {
 	puck->friction_y = 0.7f;
 	puck->isPuck = true;
 	puck->collided = false;
+
+	controlIndicator = new Entity();
+	controlIndicator->sprite = player2Sprite;
+	controlIndicator->glow = glow2Sprite;
+	controlIndicator->glowing = true;
+	controlIndicator->scale_x = 0.5f;
+	controlIndicator->scale_y = 0.5f;
+	controlIndicator->x = 0.0f;
+	controlIndicator->y = 0.0f;
+	controlIndicator->friction_x = 3.0f;
+	controlIndicator->friction_y = 3.0f;
+	controlIndicator->isPlayer2 = true;
+	controlIndicator->collided = false;
 
 	// set up board
 	SpriteSheet redSprite = SpriteSheet(glowSheet, 143.0f / 498.0f, 451.0f / 498.0f, 100.0f / 498.0f, 20.0f / 498.0f);
@@ -322,9 +360,146 @@ void GlowHockey::Init() {
 	// 3 is red
 	bottom2->cColor = 3;
 	entities.push_back(bottom2);
+
 }
 
 void GlowHockey::Update(float elapsed) {
+	switch (state) {
+	case STATE_MAIN_MENU:
+		UpdateMainMenu(elapsed);
+		break;
+	case STATE_GAME_LEVEL:
+		UpdateGameLevel(elapsed);
+		break;
+	case STATE_GAME_OVER:
+		UpdateGameOver(elapsed);
+		break;
+	}
+}
+
+void GlowHockey::UpdateMainMenu(float elapsed) {
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+			done = true;
+		}
+		else if (event.type == SDL_KEYDOWN) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_UP || event.key.keysym.scancode == SDL_SCANCODE_W) {
+				if (menuControl <= 4 && menuControl > 1){
+					menuControl--;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl <= 13 && menuControl > 11){
+					menuControl--;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl <= 22 && menuControl > 21){
+					menuControl--;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				break;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_DOWN || event.key.keysym.scancode == SDL_SCANCODE_S) {
+				if (menuControl < 4 && menuControl >= 1){
+					menuControl++;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl < 13 && menuControl >= 11){
+					menuControl++;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl < 22 && menuControl >= 21){
+					menuControl++;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				break;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_Z || event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+				if (menuControl == 1){
+					menuControl = 11;
+					Mix_PlayChannel(-1, selectMenu, 0);
+					break;
+				}
+				if (menuControl == 2){
+					menuControl = 21;
+					Mix_PlayChannel(-1, selectMenu, 0);
+					break;
+				}
+				if (menuControl == 3){
+					menuControl = 31;
+					Mix_PlayChannel(-1, selectMenu, 0);
+					break;
+				}
+				if (menuControl == 4){
+					done = true;
+					break;
+				}
+				if (menuControl == 11){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					AIDifficulty = 1.5f;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 12){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					AIDifficulty = 2.0f;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 13){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					AIDifficulty = 3.0f;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 21){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					aiOn = false;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 22){
+					break;
+				}
+				break;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_X || event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+				if (menuControl > 5){
+					menuControl = 1;
+					Mix_PlayChannel(-1, cancelMenu, 0);
+					break;
+				}
+				break;
+			}
+		}
+	}
+
+}
+
+void GlowHockey::UpdateGameOver(float elapsed) {
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+			done = true;
+		}
+		else if (event.type == SDL_KEYDOWN) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+				Init();
+				state = STATE_MAIN_MENU;
+				break;
+			}
+		}
+	}
+
+}
+
+void GlowHockey::UpdateGameLevel(float elapsed) {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
@@ -334,31 +509,45 @@ void GlowHockey::Update(float elapsed) {
 			if (event.key.keysym.scancode == SDL_SCANCODE_T) {
 				stats = !stats;
 			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_3) {
-				AIDifficulty = AIDifficulty - 0.5f;
-			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_4) {
-				AIDifficulty = AIDifficulty + 0.5f;
+			if (event.key.keysym.scancode == SDL_SCANCODE_G) {
+				state = STATE_GAME_OVER;
 			}
 		}
 	}
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	if (keys[SDL_SCANCODE_D]) {
-		player2->velocity_x = 1.0f;
-	}
 
 	if (keys[SDL_SCANCODE_W]) {
 		player2->velocity_y = 1.0f;
 	}
-	
-	if (keys[SDL_SCANCODE_S]) {
-		player2->velocity_y = -1.0f;
-	}
-	
+
 	if (keys[SDL_SCANCODE_A]){
 		player2->velocity_x = -1.0f;
 	}
-	
+
+	if (keys[SDL_SCANCODE_S]) {
+		player2->velocity_y = -1.0f;
+	}
+
+	if (keys[SDL_SCANCODE_D]) {
+		player2->velocity_x = 1.0f;
+	}
+
+	if (keys[SDL_SCANCODE_UP]) {
+		player1->velocity_y = 1.0f;
+	}
+
+	if (keys[SDL_SCANCODE_DOWN]) {
+		player1->velocity_y = -1.0f;
+	}
+
+	if (keys[SDL_SCANCODE_LEFT]){
+		player1->velocity_x = -1.0f;
+	}
+
+	if (keys[SDL_SCANCODE_RIGHT]) {
+		player1->velocity_x = 1.0f;
+	}
+
 	if (keys[SDL_SCANCODE_R]){
 		puck->x = 0.0f;
 		puck->y = 0.0f;
@@ -382,91 +571,391 @@ void GlowHockey::Update(float elapsed) {
 
 
 void GlowHockey::FixedUpdate() {
-	if (puck->y > 0.8f){
-		puck->x = 0.0f;
-		puck->y = 0.0f;
-		puck->velocity_x = 0.0f;
-		puck->velocity_y = 0.0f;
-		player2Score++;
-		// p2 score
-	}
-	if (puck->y < -0.8f){
-		puck->x = 0.0f;
-		puck->y = 0.0f;
-		puck->velocity_x = 0.0f;
-		puck->velocity_y = 0.0f;
-		player1Score++;
-		// p1 score
-	}
-
-	for (size_t i = 0; i < entities.size(); i++) {
-		// collision
-		if (entities[i]->isWall) {
-			collision(puck, entities[i]);
+	if (state == STATE_GAME_LEVEL){
+		if (puck->y > 0.8f){
+			puck->x = 0.0f;
+			puck->y = 0.0f;
+			puck->velocity_x = 0.0f;
+			puck->velocity_y = 0.0f;
+			player2Score++;
+			Mix_PlayChannel(-1, goal, 0);
+			// p2 score
 		}
+		if (puck->y < -0.8f){
+			puck->x = 0.0f;
+			puck->y = 0.0f;
+			puck->velocity_x = 0.0f;
+			puck->velocity_y = 0.0f;
+			player1Score++;
+			Mix_PlayChannel(-1, goal, 0);
+			// p1 score
+		}
+
+		if (player1Score == 7 || player2Score == 7){
+			state = STATE_GAME_OVER;
+		}
+
+		for (size_t i = 0; i < entities.size(); i++) {
+			// collision
+			if (entities[i]->isWall) {
+				collision(puck, entities[i]);
+			}
+		}
+		collision(player1, puck);
+		collision(player2, puck);
+		if (aiOn){
+			if (puck->velocity_y < 0.0f && puck->y < 0){
+				player1->velocity_x = (player1->x * -1.0f) * 3.0f * AIDifficulty;
+				player1->velocity_y = (0.8f - player1->y) * 2.0f * AIDifficulty;
+				aiState = "Returning";
+			}
+			else
+			{
+				tempSpeedX = puck->x - player1->x;
+				tempSpeedY = puck->y - player1->y;
+				player1->velocity_x = tempSpeedX * 3.0f * AIDifficulty;
+				player1->velocity_y = tempSpeedY * 2.0f * AIDifficulty;
+				aiState = "Tracking";
+			}
+		}
+
+		// apply friction
+		player1->velocity_x = lerp(player1->velocity_x, 0.0f, FIXED_TIMESTEP * player1->friction_x);
+		player1->velocity_y = lerp(player1->velocity_y, 0.0f, FIXED_TIMESTEP * player1->friction_y);
+
+		// apply velocity
+		player1->velocity_x += player1->acceleration_x * FIXED_TIMESTEP;
+		player1->velocity_y += player1->acceleration_y * FIXED_TIMESTEP;
+
+		// update x values
+		player1->x += player1->velocity_x * FIXED_TIMESTEP;
+
+		// update y values
+		player1->y += player1->velocity_y * FIXED_TIMESTEP;
+
+		// apply friction
+		player2->velocity_x = lerp(player2->velocity_x, 0.0f, FIXED_TIMESTEP * player2->friction_x);
+		player2->velocity_y = lerp(player2->velocity_y, 0.0f, FIXED_TIMESTEP * player2->friction_y);
+
+		// apply velocity
+		player2->velocity_x += player2->acceleration_x * FIXED_TIMESTEP;
+		player2->velocity_y += player2->acceleration_y * FIXED_TIMESTEP;
+
+		// update x values
+		player2->x += player2->velocity_x * FIXED_TIMESTEP;
+
+		// update y values
+		player2->y += player2->velocity_y * FIXED_TIMESTEP;
+
+		// apply friction
+		puck->velocity_x = lerp(puck->velocity_x, 0.0f, FIXED_TIMESTEP * puck->friction_x);
+		puck->velocity_y = lerp(puck->velocity_y, 0.0f, FIXED_TIMESTEP * puck->friction_y);
+
+		// apply velocity
+		puck->velocity_x += puck->acceleration_x * FIXED_TIMESTEP;
+		puck->velocity_y += puck->acceleration_y * FIXED_TIMESTEP;
+
+		// update x values
+		puck->x += puck->velocity_x * FIXED_TIMESTEP;
+
+		// update y values
+		puck->y += puck->velocity_y * FIXED_TIMESTEP;
 	}
-	collision(player1, puck);
-	collision(player2, puck);
-
-	if (puck->velocity_y < 0.0f && puck->y < 0){
-		player1->velocity_x = (player1->x * -1.0f) * 3.0f * AIDifficulty;
-		player1->velocity_y = (0.8f - player1->y) * 2.0f * AIDifficulty;
-		aiState = "Returning";
-	}
-	else //(puck->velocity_y >= 0.0f || puck->y >= 0)
-	{
-		tempSpeedX = puck->x - player1->x;
-		tempSpeedY = puck->y - player1->y;
-		player1->velocity_x = tempSpeedX * 3.0f * AIDifficulty;
-		player1->velocity_y = tempSpeedY * 2.0f * AIDifficulty;
-		aiState = "Tracking";
-	}
-
-	// apply friction
-	player1->velocity_x = lerp(player1->velocity_x, 0.0f, FIXED_TIMESTEP * player1->friction_x);
-	player1->velocity_y = lerp(player1->velocity_y, 0.0f, FIXED_TIMESTEP * player1->friction_y);
-
-	// apply velocity
-	player1->velocity_x += player1->acceleration_x * FIXED_TIMESTEP;
-	player1->velocity_y += player1->acceleration_y * FIXED_TIMESTEP;
-
-	// update x values
-	player1->x += player1->velocity_x * FIXED_TIMESTEP;
-
-	// update y values
-	player1->y += player1->velocity_y * FIXED_TIMESTEP;
-
-	// apply friction
-	player2->velocity_x = lerp(player2->velocity_x, 0.0f, FIXED_TIMESTEP * player2->friction_x);
-	player2->velocity_y = lerp(player2->velocity_y, 0.0f, FIXED_TIMESTEP * player2->friction_y);
-
-	// apply velocity
-	player2->velocity_x += player2->acceleration_x * FIXED_TIMESTEP;
-	player2->velocity_y += player2->acceleration_y * FIXED_TIMESTEP;
-
-	// update x values
-	player2->x += player2->velocity_x * FIXED_TIMESTEP;
-
-	// update y values
-	player2->y += player2->velocity_y * FIXED_TIMESTEP;
-
-	// apply friction
-	puck->velocity_x = lerp(puck->velocity_x, 0.0f, FIXED_TIMESTEP * puck->friction_x);
-	puck->velocity_y = lerp(puck->velocity_y, 0.0f, FIXED_TIMESTEP * puck->friction_y);
-
-	// apply velocity
-	puck->velocity_x += puck->acceleration_x * FIXED_TIMESTEP;
-	puck->velocity_y += puck->acceleration_y * FIXED_TIMESTEP;
-
-	// update x values
-	puck->x += puck->velocity_x * FIXED_TIMESTEP;
-
-	// update y values
-	puck->y += puck->velocity_y * FIXED_TIMESTEP;
-	
 }
 
 void GlowHockey::Render() {
+	glClear(GL_COLOR_BUFFER_BIT);
+	switch (state) {
+	case STATE_MAIN_MENU:
+		RenderMainMenu();
+		break;
+	case STATE_GAME_LEVEL:
+		RenderGameLevel();
+		break;
+	case STATE_GAME_OVER:
+		RenderGameOver();
+		break;
+	}
+	SDL_GL_SwapWindow(displayWindow);
+}
+
+void GlowHockey::RenderMainMenu() {
+	glMatrixMode(GL_MODELVIEW);
+	switch (menuControl){
+	case 1:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f/255.0f, 100.0f/255.0f, 255.0f/255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Single Player", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Multiplayer", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "How to Play", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.4f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Quit Game", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = 0.2f;
+		controlIndicator->Render();
+		break;
+	case 2:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Single Player", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Multiplayer", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "How to Play", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.4f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Quit Game", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = 0.0f;
+		controlIndicator->Render();
+		break;
+	case 3:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Single Player", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Multiplayer", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "How to Play", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.4f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Quit Game", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = -0.2f;
+		controlIndicator->Render();
+		break;
+	case 4:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Single Player", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Multiplayer", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "How to Play", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.4f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Quit Game", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = -0.4f;
+		controlIndicator->Render();
+		break;
+	case 11:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Easy", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Normal", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Impossible", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = 0.2f;
+		controlIndicator->Render();
+		break;
+	case 12:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Easy", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Normal", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Impossible", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = 0.0f;
+		controlIndicator->Render();
+		break;
+	case 13:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Easy", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Normal", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Impossible", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = -0.2f;
+		controlIndicator->Render();
+		break;
+	case 21:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Local", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Networked", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = 0.2f;
+		controlIndicator->Render();
+		break;
+	case 22:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Local", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Networked", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		controlIndicator->x = -0.95f;
+		controlIndicator->y = 0.0f;
+		controlIndicator->Render();
+		break;
+	case 31:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		glScalef(1.6f, 1.6f, 0.0f);
+		DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Controls", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.0f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Player 1: WASD", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.2f, 0.0f);
+		glScalef(0.8f, 0.8f, 0.0f);
+		DrawText(fontSheetTexture, "Player 2: Arrow keys", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.4f, 0.0f);
+		glScalef(0.4f, 0.4f, 0.0f);
+		DrawText(fontSheetTexture, "Knock the puck into the goal to score.", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		glTranslatef(-0.8f, -0.5f, 0.0f);
+		glScalef(0.4f, 0.4f, 0.0f);
+		DrawText(fontSheetTexture, "First one to seven points wins.", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glLoadIdentity();
+		break;
+	default:
+		glLoadIdentity();
+		glTranslatef(-0.8f, 0.7f, 0.0f);
+		DrawText(fontSheetTexture, "How the heck did you get here???", 0.1f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f);
+		break;
+	}
+}
+
+void GlowHockey::RenderGameOver() {
+	glLoadIdentity();
+	glTranslatef(-0.8f, 0.7f, 0.0f);
+	glScalef(1.6f, 1.6f, 0.0f);
+	DrawText(fontSheetTexture, "Glow Hockey", 0.1f, 0.0f, 255.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+	glLoadIdentity();
+	glTranslatef(-0.8f, 0.2f, 0.0f);
+	glScalef(0.6f, 0.6f, 0.0f);
+	DrawText(fontSheetTexture, "Game Over.", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+	if (player1Score > player2Score){
+		glTranslatef(0.0f, -0.2f, 0.0f);
+		DrawText(fontSheetTexture, "Top player wins!", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if (player2Score > player1Score){
+		glTranslatef(0.0f, -0.2f, 0.0f);
+		DrawText(fontSheetTexture, "Bottom player wins!", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if (player1Score == player2Score){
+		glTranslatef(0.0f, -0.2f, 0.0f);
+		DrawText(fontSheetTexture, "How the heck did", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		glTranslatef(0.0f, -0.2f, 0.0f);
+		DrawText(fontSheetTexture, "you get here???", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	glLoadIdentity();
+	glTranslatef(-0.95f, -0.8f, 0.0f);
+	glScalef(0.6f, 0.6f, 0.0f);
+	DrawText(fontSheetTexture, "Press ESC to go back to main menu.", 0.1f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+
+	glLoadIdentity();
+}
+
+void GlowHockey::RenderGameLevel() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
@@ -501,12 +990,20 @@ void GlowHockey::Render() {
 
 		// STAT TRACKING
 		if (stats){
-			glLoadIdentity();
-			glTranslatef(-1.3f, 0.8f, 0.0f);
-			glScalef(0.3f, 0.3f, 0.0f);
-			string aState = "AI State: " + aiState;
-			DrawText(fontSheetTexture, aState, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
-
+			if (aiOn){
+				glLoadIdentity();
+				glTranslatef(-1.3f, 0.8f, 0.0f);
+				glScalef(0.3f, 0.3f, 0.0f);
+				string aState = "AI State: " + aiState;
+				DrawText(fontSheetTexture, aState, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+			}
+			else {
+				glLoadIdentity();
+				glTranslatef(-1.3f, 0.8f, 0.0f);
+				glScalef(0.3f, 0.3f, 0.0f);
+				string aState = "AI State: Off";
+				DrawText(fontSheetTexture, aState, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+			}
 			glLoadIdentity();
 			glTranslatef(-1.3f, 0.7f, 0.0f);
 			glScalef(0.3f, 0.3f, 0.0f);
@@ -603,8 +1100,6 @@ void GlowHockey::Render() {
 			string aid = "AI Difficulty: " + to_string(AIDifficulty);
 			DrawText(fontSheetTexture, aid, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
 	}
-
-	SDL_GL_SwapWindow(displayWindow);
 }
 
 
@@ -708,6 +1203,7 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 				if (puck->velocity_y > 0){
 					puck->velocity_y = puck->velocity_y * -1.0f;
 				}
+				Mix_PlayChannel(-1, hitWall, 0);
 			}
 			else if (e2->down){
 				puck->collided = true;
@@ -730,6 +1226,7 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 				if (puck->velocity_y < 0){
 					puck->velocity_y = puck->velocity_y * -1.0f;
 				}
+				Mix_PlayChannel(-1, hitWall, 0);
 			}
 			else if (e2->left){
 				puck->collided = true;
@@ -752,6 +1249,7 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 				if (puck->velocity_x < 0){
 					puck->velocity_x = puck->velocity_x * -1.0f;
 				}
+				Mix_PlayChannel(-1, hitWall, 0);
 			}
 			else if (e2->right){
 				puck->collided = true;
@@ -774,6 +1272,7 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 				if (puck->velocity_x > 0){
 					puck->velocity_x = puck->velocity_x * -1.0f;
 				}
+				Mix_PlayChannel(-1, hitWall, 0);
 			}
 		}
 	}
@@ -799,6 +1298,8 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 				puck->velocity_y = player2->velocity_y + 0.2f;
 			if (player2->velocity_y <= 0)
 				puck->velocity_y = player2->velocity_y - 0.2f;
+
+			Mix_PlayChannel(-1, hitPuck, 0);
 		}
 	}
 
@@ -823,6 +1324,8 @@ bool GlowHockey::collision(Entity* e1, Entity* e2) {
 				puck->velocity_y = player1->velocity_y + 0.4f;
 			if (player1->velocity_y <= 0)
 				puck->velocity_y = player1->velocity_y - 0.4f;
+
+			Mix_PlayChannel(-1, hitPuck, 0);
 		}
 	}
 
