@@ -1,8 +1,15 @@
-﻿Build started 12/14/2014 3:24:34 AM.
+﻿Build started 12/14/2014 3:29:08 AM.
      1>Project "C:\Users\Alberdi\Documents\GitHub\CS3113\Final Project\Glow Hockey\NYUCodebase\NYUCodebase.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         D:\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\SDL2_mixer\include /IC:\SDL2\include /IC:\SDL2_image\include /IC:\glew\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt GlowHockey.cpp
+         D:\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\SDL2_mixer\include /IC:\SDL2\include /IC:\SDL2_image\include /IC:\glew\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Entity.cpp GlowHockey.cpp Matrix.cpp ParticleSystem.cpp SpriteSheet.cpp Vector.cpp main.cpp
+         main.cpp
+         Vector.cpp
+         SpriteSheet.cpp
+         ParticleSystem.cpp
+         Matrix.cpp
          GlowHockey.cpp
+         Entity.cpp
+         Generating Code...
        Link:
          D:\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Alberdi\Documents\GitHub\CS3113\Final Project\Glow Hockey\Debug\GlowHockey.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\SDL2\lib\x86 /LIBPATH:C:\SDL2_image\lib\x86 /LIBPATH:C:\SDL2_mixer\lib\x86 /LIBPATH:C:\glew\lib\Release\Win32 glew32.lib SDL2.lib SDL2main.lib SDL2_image.lib SDL2_mixer.lib OpenGL32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Alberdi\Documents\GitHub\CS3113\Final Project\Glow Hockey\Debug\GlowHockey.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Alberdi\Documents\GitHub\CS3113\Final Project\Glow Hockey\Debug\GlowHockey.lib" /MACHINE:X86 Debug\Entity.obj
          Debug\main.obj
@@ -11,9 +18,11 @@
          Debug\SpriteSheet.obj
          Debug\GlowHockey.obj
          Debug\Vector.obj
+         LINK : C:\Users\Alberdi\Documents\GitHub\CS3113\Final Project\Glow Hockey\Debug\GlowHockey.exe not found or not built by the last incremental link; performing full link
+     1>MSVCRTD.lib(cinitexe.obj) : warning LNK4098: defaultlib 'msvcrt.lib' conflicts with use of other libs; use /NODEFAULTLIB:library
          NYUCodebase.vcxproj -> C:\Users\Alberdi\Documents\GitHub\CS3113\Final Project\Glow Hockey\Debug\GlowHockey.exe
      1>Done Building Project "C:\Users\Alberdi\Documents\GitHub\CS3113\Final Project\Glow Hockey\NYUCodebase\NYUCodebase.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.91
+Time Elapsed 00:00:02.56
