@@ -122,6 +122,7 @@ private:
 
 	// controller
 	SDL_Joystick * playerOneController;
+	bool joyStickOn = false;
 
 };
 

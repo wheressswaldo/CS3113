@@ -101,6 +101,8 @@ void GlowHockey::Init() {
 
 	// controller
 	playerOneController = SDL_JoystickOpen(0);
+	// turn joystick on/off
+	joyStickOn = false;
 
 	// music
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
@@ -387,9 +389,8 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 			done = true;
 		}
-		else if (event.type == SDL_KEYDOWN || event.type == SDL_JOYBUTTONDOWN) {
-			if (event.key.keysym.scancode == SDL_SCANCODE_UP || event.key.keysym.scancode == SDL_SCANCODE_W || 
-				event.jbutton.button == 0) {
+		else if (event.type == SDL_KEYDOWN) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_UP || event.key.keysym.scancode == SDL_SCANCODE_W) {
 				if (menuControl <= 4 && menuControl > 1){
 					menuControl--;
 					Mix_PlayChannel(-1, moveMenu, 0);
@@ -407,8 +408,7 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 				}
 				break;
 			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_DOWN || event.key.keysym.scancode == SDL_SCANCODE_S ||
-				event.jbutton.button == 1) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_DOWN || event.key.keysym.scancode == SDL_SCANCODE_S) {
 				if (menuControl < 4 && menuControl >= 1){
 					menuControl++;
 					Mix_PlayChannel(-1, moveMenu, 0);
@@ -426,8 +426,103 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 				}
 				break;
 			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_Z || event.key.keysym.scancode == SDL_SCANCODE_RETURN ||
-				event.jbutton.button == 10) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_Z || event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+				if (menuControl == 1){
+					menuControl = 11;
+					Mix_PlayChannel(-1, selectMenu, 0);
+					break;
+				}
+				if (menuControl == 2){
+					menuControl = 21;
+					Mix_PlayChannel(-1, selectMenu, 0);
+					break;
+				}
+				if (menuControl == 3){
+					menuControl = 31;
+					Mix_PlayChannel(-1, selectMenu, 0);
+					break;
+				}
+				if (menuControl == 4){
+					done = true;
+					break;
+				}
+				if (menuControl == 11){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					AIDifficulty = 1.5f;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 12){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					AIDifficulty = 2.0f;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 13){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					AIDifficulty = 3.0f;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 21){
+					Mix_PlayChannel(-1, selectMenu, 0);
+					aiOn = false;
+					AIDifficulty = 0.0f;
+					state = STATE_GAME_LEVEL;
+					break;
+				}
+				if (menuControl == 22){
+					break;
+				}
+				break;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_X || event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+				if (menuControl > 5){
+					menuControl = 1;
+					Mix_PlayChannel(-1, cancelMenu, 0);
+					break;
+				}
+				break;
+			}
+		}
+		else if (event.type == SDL_JOYBUTTONDOWN) {
+			if (event.jbutton.button == 0) {
+				if (menuControl <= 4 && menuControl > 1){
+					menuControl--;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl <= 13 && menuControl > 11){
+					menuControl--;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl <= 22 && menuControl > 21){
+					menuControl--;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				break;
+			}
+			if (event.jbutton.button == 1) {
+				if (menuControl < 4 && menuControl >= 1){
+					menuControl++;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl < 13 && menuControl >= 11){
+					menuControl++;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				if (menuControl < 22 && menuControl >= 21){
+					menuControl++;
+					Mix_PlayChannel(-1, moveMenu, 0);
+					break;
+				}
+				break;
+			}
+			if (event.jbutton.button == 10) {
 				if (menuControl == 1){
 					menuControl = 11;
 					Mix_PlayChannel(-1, selectMenu, 0);
@@ -476,8 +571,7 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 				}
 				break;
 			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_X || event.key.keysym.scancode == SDL_SCANCODE_ESCAPE ||
-				event.jbutton.button == 11) {
+			if (event.jbutton.button == 11) {
 				if (menuControl > 5){
 					menuControl = 1;
 					Mix_PlayChannel(-1, cancelMenu, 0);
@@ -516,6 +610,9 @@ void GlowHockey::UpdateGameLevel(float elapsed) {
 		else if (event.type == SDL_KEYDOWN) {
 			if (event.key.keysym.scancode == SDL_SCANCODE_T) {
 				stats = !stats;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_B) {
+				joyStickOn = !joyStickOn;
 			}
 			if (event.key.keysym.scancode == SDL_SCANCODE_G) {
 				state = STATE_GAME_OVER;
@@ -728,7 +825,7 @@ void GlowHockey::FixedUpdate() {
 				aiState = "Tracking";
 			}
 		}
-		if (!aiOn){
+		if (!aiOn && joyStickOn){
 			// apply joystick
 			player1->velocity_x = 1.2f * player1->joystick_x;
 			player1->velocity_y = 1.2f * player1->joystick_y;
@@ -748,9 +845,11 @@ void GlowHockey::FixedUpdate() {
 		// update y values
 		player1->y += player1->velocity_y * FIXED_TIMESTEP;
 
-		// apply joystick
-		player2->velocity_x = 1.2f * player2->joystick_x;
-		player2->velocity_y = 1.2f * player2->joystick_y;
+		if (joyStickOn){
+			// apply joystick
+			player2->velocity_x = 1.2f * player2->joystick_x;
+			player2->velocity_y = 1.2f * player2->joystick_y;
+		}
 
 		// apply friction
 		player2->velocity_x = lerp(player2->velocity_x, 0.0f, FIXED_TIMESTEP * player2->friction_x);
