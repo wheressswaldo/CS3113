@@ -120,6 +120,9 @@ private:
 	Mix_Chunk *goal;
 	int volumeLevels;
 
+	// controller
+	SDL_Joystick * playerOneController;
+
 };
 
 float lerp(float v0, float v1, float t);

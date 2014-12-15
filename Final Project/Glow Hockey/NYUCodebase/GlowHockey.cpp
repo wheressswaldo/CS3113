@@ -46,7 +46,7 @@ float GlowHockey::generateRandomNumber(float min, float max) {
 }
 
 GlowHockey::GlowHockey() {
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
 	displayWindow = SDL_CreateWindow("GlowHockey", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
 	SDL_GL_MakeCurrent(displayWindow, context);
@@ -60,6 +60,7 @@ GlowHockey::GlowHockey() {
 }
 
 GlowHockey::~GlowHockey() {
+	SDL_JoystickClose(playerOneController);
 	SDL_Quit();
 }
 
@@ -97,6 +98,9 @@ void GlowHockey::Init() {
 
 	// menu control
 	menuControl = 1;
+
+	// controller
+	playerOneController = SDL_JoystickOpen(0);
 
 	// music
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
@@ -383,8 +387,9 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 			done = true;
 		}
-		else if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.scancode == SDL_SCANCODE_UP || event.key.keysym.scancode == SDL_SCANCODE_W) {
+		else if (event.type == SDL_KEYDOWN || event.type == SDL_JOYBUTTONDOWN) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_UP || event.key.keysym.scancode == SDL_SCANCODE_W || 
+				event.jbutton.button == 0) {
 				if (menuControl <= 4 && menuControl > 1){
 					menuControl--;
 					Mix_PlayChannel(-1, moveMenu, 0);
@@ -402,7 +407,8 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 				}
 				break;
 			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_DOWN || event.key.keysym.scancode == SDL_SCANCODE_S) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_DOWN || event.key.keysym.scancode == SDL_SCANCODE_S ||
+				event.jbutton.button == 1) {
 				if (menuControl < 4 && menuControl >= 1){
 					menuControl++;
 					Mix_PlayChannel(-1, moveMenu, 0);
@@ -420,7 +426,8 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 				}
 				break;
 			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_Z || event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_Z || event.key.keysym.scancode == SDL_SCANCODE_RETURN ||
+				event.jbutton.button == 10) {
 				if (menuControl == 1){
 					menuControl = 11;
 					Mix_PlayChannel(-1, selectMenu, 0);
@@ -469,7 +476,8 @@ void GlowHockey::UpdateMainMenu(float elapsed) {
 				}
 				break;
 			}
-			if (event.key.keysym.scancode == SDL_SCANCODE_X || event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_X || event.key.keysym.scancode == SDL_SCANCODE_ESCAPE ||
+				event.jbutton.button == 11) {
 				if (menuControl > 5){
 					menuControl = 1;
 					Mix_PlayChannel(-1, cancelMenu, 0);
@@ -488,8 +496,8 @@ void GlowHockey::UpdateGameOver(float elapsed) {
 		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 			done = true;
 		}
-		else if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+		else if (event.type == SDL_KEYDOWN || event.type == SDL_JOYBUTTONDOWN) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE || event.jbutton.button == 11) {
 				Init();
 				state = STATE_MAIN_MENU;
 				break;
@@ -511,6 +519,108 @@ void GlowHockey::UpdateGameLevel(float elapsed) {
 			}
 			if (event.key.keysym.scancode == SDL_SCANCODE_G) {
 				state = STATE_GAME_OVER;
+			}
+		}
+		else if (event.type == SDL_JOYBUTTONDOWN){
+			if (event.jbutton.button == 8){
+				stats = !stats;
+			}
+			if (event.jbutton.button == 5){
+				state = STATE_GAME_OVER;
+			}
+		}
+		else if (event.type == SDL_JOYAXISMOTION){
+			if (event.jaxis.which == 0){
+				//If the X axis changed
+				if (event.jaxis.axis == 0)
+				{
+					//If the X axis is neutral
+					if ((event.jaxis.value > -8000) && (event.jaxis.value < 8000))
+					{
+						player2->joystick_x = 0.0f;
+					}
+					//If not
+					else
+					{
+						//Adjust the velocity
+						if (event.jaxis.value < 0)
+						{
+							player2->joystick_x = (float)(event.jaxis.value)/32767.0f;
+						}
+						else
+						{
+							player2->joystick_x = (float)(event.jaxis.value)/32767.0f;
+						}
+					}
+				}
+				//If the Y axis changed
+				if (event.jaxis.axis == 1)
+				{
+					//If the Y axis is neutral
+					if ((event.jaxis.value > -8000) && (event.jaxis.value < 8000))
+					{
+						player2->joystick_y = 0;
+					}
+					//If not
+					else
+					{
+						//Adjust the velocity
+						if (event.jaxis.value < 0)
+						{
+							player2->joystick_y = (float)(event.jaxis.value * -1.0f) / 32767.0f;
+						}
+						else
+						{
+							player2->joystick_y = (float)(event.jaxis.value * -1.0f) / 32767.0f;
+						}
+					}
+				}
+				if (!aiOn){
+					//If the X axis changed
+					if (event.jaxis.axis == 2)
+					{
+						//If the X axis is neutral
+						if ((event.jaxis.value > -8000) && (event.jaxis.value < 8000))
+						{
+							player1->joystick_x = 0.0f;
+						}
+						//If not
+						else
+						{
+							//Adjust the velocity
+							if (event.jaxis.value < 0)
+							{
+								player1->joystick_x = (float)(event.jaxis.value) / 32767.0f;
+							}
+							else
+							{
+								player1->joystick_x = (float)(event.jaxis.value) / 32767.0f;
+							}
+						}
+					}
+					//If the Y axis changed
+					if (event.jaxis.axis == 3)
+					{
+						//If the Y axis is neutral
+						if ((event.jaxis.value > -8000) && (event.jaxis.value < 8000))
+						{
+							player1->joystick_y = 0;
+						}
+						//If not
+						else
+						{
+							//Adjust the velocity
+							if (event.jaxis.value < 0)
+							{
+								player1->joystick_y = (float)(event.jaxis.value * -1.0f) / 32767.0f;
+							}
+							else
+							{
+								player1->joystick_y = (float)(event.jaxis.value * -1.0f) / 32767.0f;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -618,6 +728,11 @@ void GlowHockey::FixedUpdate() {
 				aiState = "Tracking";
 			}
 		}
+		if (!aiOn){
+			// apply joystick
+			player1->velocity_x = 1.2f * player1->joystick_x;
+			player1->velocity_y = 1.2f * player1->joystick_y;
+		}
 
 		// apply friction
 		player1->velocity_x = lerp(player1->velocity_x, 0.0f, FIXED_TIMESTEP * player1->friction_x);
@@ -632,6 +747,10 @@ void GlowHockey::FixedUpdate() {
 
 		// update y values
 		player1->y += player1->velocity_y * FIXED_TIMESTEP;
+
+		// apply joystick
+		player2->velocity_x = 1.2f * player2->joystick_x;
+		player2->velocity_y = 1.2f * player2->joystick_y;
 
 		// apply friction
 		player2->velocity_x = lerp(player2->velocity_x, 0.0f, FIXED_TIMESTEP * player2->friction_x);
@@ -1099,6 +1218,14 @@ void GlowHockey::RenderGameLevel() {
 			glScalef(0.3f, 0.3f, 0.0f);
 			string aid = "AI Difficulty: " + to_string(AIDifficulty);
 			DrawText(fontSheetTexture, aid, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
+			glLoadIdentity();
+			glTranslatef(-1.3f, -0.8f, 0.0f);
+			glScalef(0.3f, 0.3f, 0.0f);
+			int num_joy = SDL_NumJoysticks();
+			string joySticks = "Joysticks: " + to_string(num_joy);
+			DrawText(fontSheetTexture, joySticks, 0.1f, 0.0f, 10.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+
 	}
 }
 
