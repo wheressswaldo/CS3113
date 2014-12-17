@@ -13,15 +13,5 @@ Final Project - Glow Hockey
 
   * AI
 
-  * Different size maps
-
   * Controller support
-
-**Difficulty Menu Sample:**
-
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Final%20Project/1.png?raw=true "Menu")
-
-**In Game:**
-
-![Alt text](https://github.com/wheressswaldo/CS3113/blob/master/Final%20Project/2.png?raw=true "Game")
 
