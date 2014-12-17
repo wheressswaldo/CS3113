@@ -101,8 +101,6 @@ void GlowHockey::Init() {
 
 	// controller
 	playerOneController = SDL_JoystickOpen(0);
-	// turn joystick on/off
-	joyStickOn = false;
 
 	// music
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
@@ -827,8 +825,8 @@ void GlowHockey::FixedUpdate() {
 		}
 		if (!aiOn && joyStickOn){
 			// apply joystick
-			player1->velocity_x = 1.2f * player1->joystick_x;
-			player1->velocity_y = 1.2f * player1->joystick_y;
+			player1->velocity_x = 1.6f * player1->joystick_x;
+			player1->velocity_y = 1.6f * player1->joystick_y;
 		}
 
 		// apply friction
@@ -847,8 +845,8 @@ void GlowHockey::FixedUpdate() {
 
 		if (joyStickOn){
 			// apply joystick
-			player2->velocity_x = 1.2f * player2->joystick_x;
-			player2->velocity_y = 1.2f * player2->joystick_y;
+			player2->velocity_x = 1.6f * player2->joystick_x;
+			player2->velocity_y = 1.6f * player2->joystick_y;
 		}
 
 		// apply friction
