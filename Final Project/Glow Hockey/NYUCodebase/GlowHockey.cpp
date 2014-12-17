@@ -263,7 +263,6 @@ void GlowHockey::Init() {
 	// 4 is yellow
 	top2->cColor = 4;
 	entities.push_back(top2);
-
 	Entity* rightside1 = new Entity();
 	rightside1->sprite = yellowSprite;
 	rightside1->glow = yellowGlowSprite;
@@ -640,7 +639,7 @@ void GlowHockey::UpdateGameLevel(float elapsed) {
 						//Adjust the velocity
 						if (event.jaxis.value < 0)
 						{
-							player2->joystick_x = (float)(event.jaxis.value)/32767.0f;
+							player2->joawystick_x = (float)(event.jaxis.value)/32767.0f;
 						}
 						else
 						{
